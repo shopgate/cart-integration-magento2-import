@@ -1,0 +1,4 @@
+.php-cs.cache
+vendor
+release/shopgate_*
+release/validate_m2_package.php

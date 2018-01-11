@@ -1,0 +1,41 @@
+dist: trusty
+sudo: false
+language: php
+
+install:
+- phpenv config-rm xdebug.ini || return 0
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+
+script:
+  - curl -L http://files.shopgate.com/travis-ci/php-cs-fixer.phar -o php-cs-fixer
+  - chmod a+x php-cs-fixer
+  - git checkout $TRAVIS_BRANCH
+  - ./php-cs-fixer fix --config=.php-cs.dist --cache-file=.php-cs.cache --diff --dry-run --verbose
+  - rm php-cs-fixer
+jobs:
+  include:
+  - stage: deploy
+    php: 7.0
+    before_script: skip
+    script:
+    - if [[ "$TRAVIS_TAG" ]]; then
+        chmod +x ./release/build_release_package.sh;
+        ./release/build_release_package.sh;
+      fi
+    deploy:
+      provider: releases
+      api_key: ${GITHUB_TOKEN}
+      file: shopgate_import-${TRAVIS_TAG}.zip
+      skip_cleanup: true
+      on:
+        tags: true
+
+notifications:
+  slack:
+    rooms:
+      secure: bjLaCJhuIOioHhcXZ7KgtNff6CqUkxzg4gzkcGE9F7Vn/CEakj0ehZE1LsQO9xElqmVUnyq076K5Y+7F0ToXrgLXkG2zfgFEVf8topPzHvS4zbYsAR66bEMvFOzan5LgTVB0OpFE5Ezj5mrltsDTALPY5YzpESO36Mbj2qE62UWxlNlKfx6EyM2fM1hRv1nZBDSSpSya4E1ti0MOqS7joLk7WuJhDII/8gTbfuC8rGbtja/hjZqdfJzgbROl345nbqeRsakLSYP9FpInezAAYUBrT5V6rc8el5Yp+TTqotSRlWAoktUaBlmLgNi4Q3sF1WTV2xq1SMfAp9ZU6YRYof55X9CrRNRQk1xk2PlDSBa/PXO/o5pDEm0Tn2Xc7ceQJGY9EM1we8BuBQEGB/XJiib8fLNmeqEs/9phBklsuXzIryYiVm3eMHFodDbkNnSwqaL9TjXDT+325CNbKix9Lmp0KAuvBNrDcp1N7nvaGqJ2QHxvp7n/QnpUiWbR8XuCXUEYQ1ySunG2TNQT5pXf8Eg1QP1yzDEfrIkSRxq68xIN6tuBZt0z6ST3tN53x4XcKOu+KDvsnOqv5OuE8muI936loNR6otPNVLtg5ZbaCOmCDY12rFHV6rB8yPlOnN9TaXP3PIGCNctqZoUone/urDTye8VhL8yoZucARRydzSY=
+    on_success: change
+    on_failure: always

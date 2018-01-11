@@ -1,0 +1,15 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <shopgate_import>
+            <order>
+                <shipping_title>Fixed</shipping_title>
+                <send_new_order_mail>0</send_new_order_mail>
+            </order>
+        </shopgate_import>
+        <payment>
+            <shopgate>
+                <active>1</active>
+            </shopgate>
+        </payment>
+    </default>
+</config>

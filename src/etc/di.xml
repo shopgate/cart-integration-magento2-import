@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Shopgate\Base\Api\ImportInterface" type="Shopgate\Import\Api\ImportInterface"/>
+    <preference for="Shopgate\Import\Api\ImportInterface" type="Shopgate\Import\Model\Service\Import"/>
+    <type name="Shopgate\Import\Helper\Order">
+        <arguments>
+            <argument name="quoteMethods" xsi:type="array">
+                <item name="customer" xsi:type="string">customer</item><!-- before items for address saving -->
+                <item name="items" xsi:type="string">items</item>
+                <item name="shipping" xsi:type="string">shipping</item>
+                <item name="payment" xsi:type="string">payment</item>
+                <item name="external_coupons" xsi:type="string">external_coupons</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Shopgate\Import\Model\Service\Import">
+        <arguments>
+            <argument name="addOrderMethods" xsi:type="array">
+                <item name="start_add" xsi:type="string">start_add</item><!-- must be first -->
+                <item name="order_status_history" xsi:type="string">order_status_history</item>
+                <item name="order_payment" xsi:type="string">order_payment</item>
+                <item name="order_state" xsi:type="string">order_state</item>
+                <item name="order_shipping" xsi:type="string">order_shipping</item>
+                <item name="custom_fields" xsi:type="string">custom_fields</item>
+                <item name="order_notification" xsi:type="string">order_notification</item>
+                <item name="end_add" xsi:type="string">end_add</item><!-- must be last -->
+            </argument>
+            <argument name="updateOrderMethods" xsi:type="array">
+                <item name="start_update" xsi:type="string">start_update</item><!-- must be first -->
+                <item name="update_payment" xsi:type="string">update_payment</item>
+                <item name="update_shipping" xsi:type="string">update_shipping</item>
+                <item name="end_update" xsi:type="string">end_update</item><!-- must be last -->
+            </argument>
+        </arguments>
+    </type>
+</config>

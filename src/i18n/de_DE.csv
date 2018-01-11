@@ -1,0 +1,8 @@
+"Order","Bestellungen"
+"Note: Will be visible in Customer Account and transactional Mails!","Hinweis: Wird im Kundenbereich und den Transaktionsmails angezeigt!"
+"Send email to customer on new order","Sende email an den Kunden, wenn eine neue Bestellung eintrifft"
+"Note: Shopgate also sends a order confirmation email to the customer!","Hinweis: Shopgate sendet ebenfalls eine Auftragsbestätigung per E-Mail an den Kunden!"
+"New Order Status","Status für neue Bestellungen"
+"[SHOPGATE] Order added by Shopgate.","[SHOPGATE] Bestellung durch Shopgate hinzugefügt."
+"[SHOPGATE] Shopgate order number: %1","[SHOPGATE] Shopgate-Bestellnummer: %1"
+"[SHOPGATE] Payment received.","[SHOPGATE] Die Zahlung wurde erhalten."
