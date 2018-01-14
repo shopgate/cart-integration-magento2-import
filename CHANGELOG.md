@@ -6,8 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## 2.9.6
+### Changed
+- Changed the GitHub composer naming so that it does not clash with Marketplace repo
 
-## 2.9.5
+## [2.9.5]
 ### Changed
 - Composer file details
 
@@ -32,4 +35,5 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.5...HEAD
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.6...HEAD
+[2.9.5]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.5...2.9.6

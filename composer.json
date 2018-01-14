@@ -1,5 +1,5 @@
 {
-  "name": "shopgate/import",
+  "name": "shopgate/cart-integration-magento2-import",
   "description": "Shopgate import module for Magento 2, handles all import functionality",
   "license": "Apache-2.0",
   "type": "magento2-module",
@@ -22,7 +22,7 @@
     }
   ],
   "require": {
-    "shopgate/base": "~2.9.4"
+    "shopgate/cart-integration-magento2-base": "~2.9.4"
   },
   "autoload": {
     "files": [

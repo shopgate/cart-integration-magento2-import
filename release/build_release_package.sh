@@ -5,6 +5,8 @@ ZIP_FILE="${ZIP_FOLDER}.zip"
 
 # Remove mentioning the src/ structure when packaging
 sed -i 's/src\///g' composer.json
+# Strips the composer name of the package to submit to marketplace, changes to "shopgate/import"
+sed -i 's/cart-integration-magento2-//g' composer.json
 
 mkdir release/${ZIP_FOLDER}
 rsync -a ./src/ release/${ZIP_FOLDER}
