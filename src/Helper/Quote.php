@@ -84,7 +84,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
     }
 
     /**
-     * Same logic as in \Magento\Quote\Model\Quote\Address\Total\AbstractTotal\Shipping::collect
+     * Same logic as in \Magento\Quote\Model\Quote\Address\Total\AbstractTotal\Shipping::collect()
      */
     protected function setItemQty()
     {
