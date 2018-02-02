@@ -58,6 +58,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
      */
     protected function setShipping()
     {
+        $this->setItemQty();
         $methodName = $this->sgBase->getShippingInfos()->getName();
         $rate       = $this->quote->getShippingAddress()
                                   ->setCollectShippingRates(true)
@@ -80,5 +81,32 @@ class Quote extends \Shopgate\Base\Helper\Quote
             ]
         );
         $this->quote->getPayment()->setParentTransactionId($this->sgBase->getPaymentTransactionNumber());
+    }
+
+    /**
+     * Same logic as in \Magento\Quote\Model\Quote\Address\Total\AbstractTotal\Shipping::collect
+     */
+    protected function setItemQty()
+    {
+        $addressQty = 0;
+        foreach ($this->quote->getItems() as $item) {
+            /**
+             * Skip if this item is virtual
+             */
+            if ($item->getProduct()->isVirtual()) {
+                continue;
+            }
+
+            /**
+             * Children weight we calculate for parent
+             */
+            if ($item->getParentItem()) {
+                continue;
+            }
+
+            $addressQty += $item->getQty();
+        }
+
+        $this->quote->getShippingAddress()->setItemQty($addressQty);
     }
 }
