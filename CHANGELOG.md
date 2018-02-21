@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Fixed
 - item quantity in shipping mapping
+### Added
+- Support of asynchronous sending setting for sales emails
 
 ## 2.9.6
 ### Changed

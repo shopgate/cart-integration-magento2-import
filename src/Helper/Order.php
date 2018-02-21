@@ -284,7 +284,7 @@ class Order
      */
     protected function setOrderNotification()
     {
-        $this->mageOrder->setEmailSent(0);
+        $this->mageOrder->setEmailSent(null);
         if ($this->config->getConfigByPath(ImportService::PATH_SEND_NEW_ORDER_MAIL)->getValue()) {
             $this->log->debug('# Notified customer about new order');
             $this->orderNotifier->notify($this->mageOrder);
