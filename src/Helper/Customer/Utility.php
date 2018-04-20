@@ -88,7 +88,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
             /** @var Address $magentoAddress */
             $magentoAddress = $this->addressFactory->create();
             $magentoAddress->setCustomerId($magentoCustomer->getId());
-            $data = $this->customerHelper->createAddressData($customer, $shopgateAddress);
+            $data = $this->customerHelper->createAddressData($customer, $shopgateAddress, $magentoCustomer->getId());
             $magentoAddress->addData($data);
             $magentoAddress->save();
 

@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
-## 2.9.6
+## [2.9.7] - 2018-04-19
+### Fixed
+- Item quantity in shipping mapping
+- Saving of the address in customer registration
+### Added
+- Support of asynchronous sending setting for sales emails
+
+## [2.9.6]
 ### Changed
 - Changed the GitHub composer naming so that it does not clash with Marketplace repo
 
@@ -35,5 +42,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.6...HEAD
-[2.9.5]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.5...2.9.6
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.7...HEAD
+[2.9.7]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.6...2.9.7
+[2.9.6]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.5...2.9.6
