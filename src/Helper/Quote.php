@@ -64,7 +64,9 @@ class Quote extends \Shopgate\Base\Helper\Quote
                                   ->setCollectShippingRates(true)
                                   ->collectShippingRates()
                                   ->getShippingRateByCode($methodName);
-        $this->quote->getShippingAddress()->setShippingMethod($rate ? $methodName : 'shopgate_fix');
+        $this->quote->getShippingAddress()
+                    ->setShippingMethod($rate ? $methodName : 'shopgate_fix')
+                    ->setData(OrderCondition::CLIENT_ATTRIBUTE, $this->sgBase->getClient()->getType());
     }
 
     /**
