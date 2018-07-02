@@ -26,6 +26,7 @@ use Magento\Framework\DataObject;
 use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Shopgate\Base\Model\Payment\Shopgate;
+use Shopgate\Base\Model\Rule\Condition\ShopgateOrder as OrderCondition;
 
 class Quote extends \Shopgate\Base\Helper\Quote
 {
