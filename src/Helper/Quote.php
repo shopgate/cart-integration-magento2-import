@@ -60,6 +60,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
     protected function setShipping()
     {
         $this->setItemQty();
+        $client     = is_null($this->sgBase->getClient()) ? '' : $this->sgBase->getClient()->getType();
         $methodName = $this->sgBase->getShippingInfos()->getName();
         $rate       = $this->quote->getShippingAddress()
                                   ->setCollectShippingRates(true)
@@ -67,7 +68,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
                                   ->getShippingRateByCode($methodName);
         $this->quote->getShippingAddress()
                     ->setShippingMethod($rate ? $methodName : 'shopgate_fix')
-                    ->setData(OrderCondition::CLIENT_ATTRIBUTE, $this->sgBase->getClient()->getType());
+                    ->setData(OrderCondition::CLIENT_ATTRIBUTE, $client);
     }
 
     /**
