@@ -26,6 +26,7 @@ use Magento\Framework\DataObject;
 use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Shopgate\Base\Model\Payment\Shopgate;
+use Shopgate\Base\Model\Rule\Condition\ShopgateOrder as OrderCondition;
 
 class Quote extends \Shopgate\Base\Helper\Quote
 {
@@ -59,12 +60,15 @@ class Quote extends \Shopgate\Base\Helper\Quote
     protected function setShipping()
     {
         $this->setItemQty();
+        $client     = is_null($this->sgBase->getClient()) ? '' : $this->sgBase->getClient()->getType();
         $methodName = $this->sgBase->getShippingInfos()->getName();
         $rate       = $this->quote->getShippingAddress()
                                   ->setCollectShippingRates(true)
                                   ->collectShippingRates()
                                   ->getShippingRateByCode($methodName);
-        $this->quote->getShippingAddress()->setShippingMethod($rate ? $methodName : 'shopgate_fix');
+        $this->quote->getShippingAddress()
+                    ->setShippingMethod($rate ? $methodName : 'shopgate_fix')
+                    ->setData(OrderCondition::CLIENT_ATTRIBUTE, $client);
     }
 
     /**
