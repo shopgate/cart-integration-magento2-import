@@ -45,7 +45,7 @@ class Order
     /** @var Utility */
     private $utility;
     /** @var Base */
-    private $sgOrder;
+    protected $sgOrder;
     /** @var SgLoggerInterface */
     private $log;
     /** @var Quote */
