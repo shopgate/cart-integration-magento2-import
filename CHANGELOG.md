@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Configuration for Shopgate payment method title
+
 ## [2.9.8] - 2018-08-01
 ### Added
 - Validation off app-only cart rules in order import
