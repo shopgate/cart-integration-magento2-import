@@ -57,7 +57,7 @@ class Order
     /** @var OrderRepository */
     private $orderRepository;
     /** @var MageOrder */
-    private $mageOrder;
+    protected $mageOrder;
     /** @var OrderRepositoryInterface */
     private $sgOrderRepository;
     /** @var CoreInterface */
@@ -71,7 +71,7 @@ class Order
     /** @var Shipping */
     private $shippingHelper;
     /** @var ManagerInterface */
-    private $eventManager;
+    protected $eventManager;
 
     /**
      * @param Utility                  $utility
