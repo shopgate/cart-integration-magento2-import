@@ -22,8 +22,8 @@
                 <item name="order_state" xsi:type="string">order_state</item>
                 <item name="order_shipping" xsi:type="string">order_shipping</item>
                 <item name="custom_fields" xsi:type="string">custom_fields</item>
-                <item name="order_notification" xsi:type="string">order_notification</item>
-                <item name="end_add" xsi:type="string">end_add</item><!-- must be last -->
+                <item name="end_add" xsi:type="string">end_add</item>
+                <item name="order_notification" xsi:type="string">order_notification</item><!-- must be last -->
             </argument>
             <argument name="updateOrderMethods" xsi:type="array">
                 <item name="start_update" xsi:type="string">start_update</item><!-- must be first -->

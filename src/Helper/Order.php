@@ -57,7 +57,7 @@ class Order
     /** @var OrderRepository */
     private $orderRepository;
     /** @var MageOrder */
-    private $mageOrder;
+    protected $mageOrder;
     /** @var OrderRepositoryInterface */
     private $sgOrderRepository;
     /** @var CoreInterface */
@@ -71,7 +71,7 @@ class Order
     /** @var Shipping */
     private $shippingHelper;
     /** @var ManagerInterface */
-    private $eventManager;
+    protected $eventManager;
 
     /**
      * @param Utility                  $utility
@@ -148,6 +148,7 @@ class Order
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \ShopgateLibraryException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function setStartAdd()
     {
@@ -182,6 +183,7 @@ class Order
      *
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \ShopgateLibraryException
+     * @throws \Magento\Framework\Exception\InputException
      */
     protected function setStartUpdate()
     {
@@ -200,7 +202,7 @@ class Order
      */
     public function setEndUpdate()
     {
-        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'), false)
+        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'))
                         ->setIsCustomerNotified(false);
 
         $this->orderRepository->save($this->mageOrder);
@@ -220,6 +222,8 @@ class Order
 
     /**
      * Checks if shipments should be updated for an existing order
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function setUpdateShipping()
     {
@@ -249,8 +253,7 @@ class Order
     protected function setOrderStatusHistory()
     {
         $this->mageOrder->addStatusHistoryComment(
-            __('[SHOPGATE] Order added by Shopgate # %1', $this->sgOrder->getOrderNumber()),
-            false
+            __('[SHOPGATE] Order added by Shopgate # %1', $this->sgOrder->getOrderNumber())
         )->setIsCustomerNotified(false);
     }
 
@@ -261,10 +264,10 @@ class Order
      */
     protected function setOrderPayment()
     {
-        if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue()) {
+        if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
             $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
             $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
-            $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'), false)
+            $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
                             ->setIsCustomerNotified(false);
         }
     }
@@ -275,12 +278,13 @@ class Order
     protected function setOrderShipping()
     {
         $shippingTitle = $this->sgOrder->getShippingInfos()->getDisplayName();
-        //@todo-konstantin: double check that I don't need to: IF $this->sgOrder->getShippingType() === 'PLUGINAPI'
         $this->mageOrder->setShippingDescription($shippingTitle);
     }
 
     /**
      * Send order notification if activated in config
+     *
+     * @throws \Magento\Framework\Exception\MailException
      */
     protected function setOrderNotification()
     {

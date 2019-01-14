@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Fixed
+- Sending of confirmation mail in case of a failed order import
+
 ## [2.9.9] - 2018-10-28
 ### Added
 - Configuration for Shopgate payment method title
