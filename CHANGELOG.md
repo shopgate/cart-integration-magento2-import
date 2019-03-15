@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Fixed
 - Sending of confirmation mail in case of a failed order import
+- Status issues after unholding orders, which were imported with the status On Hold
 
 ## [2.9.9] - 2018-10-28
 ### Added
