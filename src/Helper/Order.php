@@ -246,7 +246,7 @@ class Order
         $orderState  = $this->utility->getStateForStatus($orderStatus);
         if ($orderState === MageOrder::STATE_HOLDED) {
             $this->mageOrder->hold();
-            
+
             return;
         }
         $this->mageOrder->setState($orderState)->setStatus($orderStatus);
