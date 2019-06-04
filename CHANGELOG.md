@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.9.10] - 2019-06-04
 ### Fixed
 - Sending of confirmation mail in case of a failed order import
 - Status issues after unholding orders, which were imported with the status On Hold
@@ -53,7 +55,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.9...HEAD
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.10...HEAD
+[2.9.10]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.9...2.9.10
 [2.9.9]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.8...2.9.9
 [2.9.8]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.7...2.9.8
 [2.9.7]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.6...2.9.7
