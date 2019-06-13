@@ -27,14 +27,6 @@ jobs:
           chmod +x ./release/build_release_package.sh;
           ./release/build_release_package.sh;
           fi
-    - stage: deploy
-      php: '7.1'
-      before_script: skip
-      script:
-        - if [[ "$TRAVIS_TAG" ]]; then
-          chmod +x ./release/build_release_package.sh;
-          ./release/build_release_package.sh;
-          fi
       deploy:
         provider: releases
         api_key: ${GITHUB_TOKEN}
