@@ -3,7 +3,7 @@ sudo: false
 language: php
 
 install:
-- phpenv config-rm xdebug.ini || return 0
+  - phpenv config-rm xdebug.ini || return 0
 
 script:
   - curl -L https://cs.symfony.com/download/php-cs-fixer-v2.phar -o php-cs-fixer
@@ -27,21 +27,21 @@ jobs:
           chmod +x ./release/build_release_package.sh;
           ./release/build_release_package.sh;
           fi
-  - stage: deploy
-    php: '7.1'
-    before_script: skip
-    script:
-    - if [[ "$TRAVIS_TAG" ]]; then
-        chmod +x ./release/build_release_package.sh;
-        ./release/build_release_package.sh;
-      fi
-    deploy:
-      provider: releases
-      api_key: ${GITHUB_TOKEN}
-      file: shopgate-import-${TRAVIS_TAG}.zip
-      skip_cleanup: true
-      on:
-        tags: true
+    - stage: deploy
+      php: '7.1'
+      before_script: skip
+      script:
+        - if [[ "$TRAVIS_TAG" ]]; then
+          chmod +x ./release/build_release_package.sh;
+          ./release/build_release_package.sh;
+          fi
+      deploy:
+        provider: releases
+        api_key: ${GITHUB_TOKEN}
+        file: shopgate-import-${TRAVIS_TAG}.zip
+        skip_cleanup: true
+        on:
+          tags: true
 
 notifications:
   slack:
