@@ -68,7 +68,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
      *
      * @throws Exception
      */
-    public function setBasicData($magentoCustomer, $customer): void
+    public function setBasicData($magentoCustomer, $customer)
     {
         $customFields = $this->customerHelper->getCustomFields($customer);
         $magentoCustomer->setConfirmation(null);
@@ -86,7 +86,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
      *
      * @throws Exception
      */
-    public function setAddressData($magentoCustomer, $customer): void
+    public function setAddressData($magentoCustomer, $customer)
     {
         foreach ($customer->getAddresses() as $shopgateAddress) {
             /** @var Address $magentoAddress */
