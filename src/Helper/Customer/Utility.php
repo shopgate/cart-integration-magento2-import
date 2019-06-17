@@ -22,6 +22,7 @@
 
 namespace Shopgate\Import\Helper\Customer;
 
+use Exception;
 use Magento\Customer\Model\Address;
 use Magento\Customer\Model\AddressFactory;
 use Magento\Customer\Model\Customer;
@@ -29,6 +30,7 @@ use Magento\Customer\Model\Data\Customer as DataCustomer;
 use Magento\Customer\Model\ResourceModel\Group\Collection as GroupCollection;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Tax\Model\ResourceModel\TaxClass\Collection as TaxClassCollection;
+use Shopgate\Base\Helper\Regions;
 use Shopgate\Base\Helper\Shopgate\Customer as CustomerHelper;
 use ShopgateCustomer;
 
@@ -45,24 +47,26 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
      * @param CountryFactory     $countryFactory
      * @param AddressFactory     $addressFactory
      * @param CustomerHelper     $customer
+     * @param Regions            $regions
      */
     public function __construct(
         GroupCollection $customerGroupCollection,
         TaxClassCollection $taxCollection,
         CountryFactory $countryFactory,
         AddressFactory $addressFactory,
-        CustomerHelper $customer
+        CustomerHelper $customer,
+        Regions $regions
     ) {
         $this->addressFactory = $addressFactory;
         $this->customerHelper = $customer;
-        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory);
+        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions);
     }
 
     /**
      * @param Customer | DataCustomer $magentoCustomer
      * @param ShopgateCustomer        $customer
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function setBasicData($magentoCustomer, $customer)
     {
@@ -81,7 +85,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
      * @param Customer | DataCustomer $magentoCustomer
      * @param ShopgateCustomer        $customer
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function setAddressData($magentoCustomer, $customer)
     {
