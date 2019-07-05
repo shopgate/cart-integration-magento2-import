@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Mapping of shipping method during order import
 
 ## [2.9.11] - 2019-06-17
 ### Added
 - Compatibility with Base module's constructor changes
-### Fixed
-- Mapping of shipping method during order import
 
 ## [2.9.10] - 2019-06-04
 ### Fixed
