@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [2.9.12] - 2019-07-18
+### Fixed
+- Mapping of shipping method during order import
+
 ## [2.9.11] - 2019-06-17
 ### Added
 - Compatibility with Base module's constructor changes
@@ -59,7 +63,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.11...HEAD
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.12...HEAD
+[2.9.12]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.11...2.9.12
 [2.9.11]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.10...2.9.11
 [2.9.10]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.9...2.9.10
 [2.9.9]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.8...2.9.9
