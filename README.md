@@ -1,6 +1,6 @@
 # Shopgate Magento2 Import Integration
 
-[![GitHub license](http://dmlc.github.io/img/apache2.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 [![Build Status](https://travis-ci.org/shopgate/cart-integration-magento2-import.svg?branch=master)](https://travis-ci.org/shopgate/cart-integration-magento2-import)
 
 The Shopgate Magento2 Import integration enables you to connect your Magento2 store with the Shopgate backend.
