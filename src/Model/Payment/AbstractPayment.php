@@ -26,6 +26,7 @@ namespace Shopgate\Import\Model\Payment;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\Manager;
+use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Store\Model\ScopeInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
@@ -44,7 +45,6 @@ abstract class AbstractPayment
      * The config path to module's not paid status
      */
     const XML_CONFIG_STATUS_NOT_PAID = '';
-
     /**
      * The name of the module, as defined in etc/module.xml
      */
@@ -105,5 +105,15 @@ abstract class AbstractPayment
     public function isModuleActive(): bool
     {
         return $this->moduleManager->isEnabled(static::MODULE_CONFIG);
+    }
+
+    /**
+     * Returns the concrete payment model instance
+     *
+     * @return MethodInterface
+     */
+    public function getPaymentModel(): MethodInterface
+    {
+
     }
 }
