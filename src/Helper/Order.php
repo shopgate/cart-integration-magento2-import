@@ -37,6 +37,7 @@ use Shopgate\Base\Model\Shopgate\Extended\Base;
 use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
 use Shopgate\Import\Helper\Order\Utility;
+use Shopgate\Import\Model\Payment\Factory;
 use Shopgate\Import\Model\Service\Import as ImportService;
 
 class Order
@@ -72,6 +73,8 @@ class Order
     private $shippingHelper;
     /** @var ManagerInterface */
     protected $eventManager;
+    /** @var Factory */
+    private $paymentFactory;
 
     /**
      * @param Utility                  $utility
@@ -88,6 +91,7 @@ class Order
      * @param Shopgate\Order           $localSgOrder
      * @param Shipping                 $shippingHelper
      * @param ManagerInterface         $eventManager
+     * @param Factory                  $paymentFactory
      * @param array                    $quoteMethods
      */
     public function __construct(
@@ -105,6 +109,7 @@ class Order
         Shopgate\Order $localSgOrder,
         Shipping $shippingHelper,
         ManagerInterface $eventManager,
+        Factory $paymentFactory,
         array $quoteMethods = []
     ) {
         $this->utility           = $utility;
@@ -122,6 +127,7 @@ class Order
         $this->localSgOrder      = $localSgOrder;
         $this->shippingHelper    = $shippingHelper;
         $this->eventManager      = $eventManager;
+        $this->paymentFactory    = $paymentFactory;
     }
 
     /**
@@ -271,6 +277,11 @@ class Order
      */
     protected function setOrderPayment()
     {
+//        $paymentMethod = $this->paymentFactory->getPayment(
+//            $this->sgOrder->getPaymentMethod(),
+//            $this->sgOrder,
+//            $this->mageOrder
+//        );
         if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
             $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
             $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
