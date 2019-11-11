@@ -55,13 +55,13 @@ class Factory
     public function getPayment(
         string $paymentMethod,
         MagentoOrder $magentoOrder,
-        ShopgateOrder $shopgateOrder): AbstractPayment
-    {
+        ShopgateOrder $shopgateOrder
+    ): AbstractPayment {
         if (!$this->paymentMethod || !$this->paymentMethod->isValid()) {
-            $methodToLoad = $this->paymentMapping[$paymentMethod] ? : self::DEFAULT_PAYMENT_METHOD;
+            $methodToLoad        = $this->paymentMapping[$paymentMethod] ? : self::DEFAULT_PAYMENT_METHOD;
             $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create(
                 [
-                    'magentoOrder' => $magentoOrder,
+                    'magentoOrder'  => $magentoOrder,
                     'shopgateOrder' => $shopgateOrder
                 ]
             );

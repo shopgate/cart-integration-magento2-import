@@ -29,8 +29,10 @@ use Magento\Framework\Module\Manager;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
+use Magento\Sales\Model\Order as MageOrder;
 use Magento\Store\Model\ScopeInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
+use Shopgate\Import\Helper\Order\Utility;
 
 abstract class AbstractPayment
 {
@@ -50,32 +52,46 @@ abstract class AbstractPayment
      * The name of the module, as defined in etc/module.xml
      */
     const MODULE_CONFIG = '';
-
+    /**
+     * The code of the magento payment method
+     */
     const PAYMENT_CODE = '';
 
+    /** @var MagentoOrder */
+    protected $magentoOrder;
+    /** @var ShopgateOrder */
+    protected $shopgateOrder;
     /** @var ScopeConfigInterface */
     private $scopeConfig;
-    /** @var MagentoOrder */
-    private $magentoOrder;
-    /** @var ShopgateOrder */
-    private $shopgateOrder;
     /** @var Manager */
     private $moduleManager;
     /** @var PaymentHelper */
     private $paymentHelper;
+    /** @var Utility */
+    private $utility;
 
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param MageOrder            $magentoOrder
+     * @param ShopgateOrder        $shopgateOrder
+     * @param Manager              $moduleManager
+     * @param PaymentHelper        $paymentHelper
+     * @param Utility              $utility
+     */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         MagentoOrder $magentoOrder,
         ShopgateOrder $shopgateOrder,
         Manager $moduleManager,
-        PaymentHelper $paymentHelper
+        PaymentHelper $paymentHelper,
+        Utility $utility
     ) {
-        $this->scopeConfig          = $scopeConfig;
-        $this->magentoOrder         = $magentoOrder;
-        $this->shopgateOrder        = $shopgateOrder;
-        $this->moduleManager        = $moduleManager;
-        $this->paymentHelper        = $paymentHelper;
+        $this->scopeConfig   = $scopeConfig;
+        $this->magentoOrder  = $magentoOrder;
+        $this->shopgateOrder = $shopgateOrder;
+        $this->moduleManager = $moduleManager;
+        $this->paymentHelper = $paymentHelper;
+        $this->utility       = $utility;
     }
 
     /**
@@ -83,7 +99,17 @@ abstract class AbstractPayment
      */
     public function setUp(): void
     {
+    }
 
+    /**
+     * Returns the concrete payment model instance
+     *
+     * @return MethodInterface|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getPaymentModel(): ?MethodInterface
+    {
+        return $this->isValid() ? $this->paymentHelper->getMethodInstance(static::PAYMENT_CODE) : null;
     }
 
     /**
@@ -115,13 +141,29 @@ abstract class AbstractPayment
     }
 
     /**
-     * Returns the concrete payment model instance
-     *
-     * @return MethodInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Allows manipulation of order data
      */
-    public function getPaymentModel(): ?MethodInterface
+    public function manipulateOrderWithPaymentData(): void
     {
-        return $this->isModuleActive() ? $this->paymentHelper->getMethodInstance(static::PAYMENT_CODE) : null;
+    }
+
+    /**
+     * Sets order status based on configuration
+     */
+    public function setOrderStatus(): void
+    {
+        $orderStatus = $this->shopgateOrder->getIsPaid()
+            ? static::XML_CONFIG_STATUS_PAID
+            : static::XML_CONFIG_STATUS_NOT_PAID;
+
+        $orderState  = $this->utility->getStateForStatus($orderStatus);
+        if ($orderState === MagentoOrder::STATE_HOLDED) {
+            if ($this->magentoOrder->canHold()) {
+                $this->magentoOrder->hold();
+            }
+
+            return;
+        }
+        $this->magentoOrder->setState($orderState)->setStatus($orderStatus);
     }
 }

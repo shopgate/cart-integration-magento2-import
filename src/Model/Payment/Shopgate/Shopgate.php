@@ -40,4 +40,20 @@ class Shopgate extends AbstractPayment
     {
         return true;
     }
+
+    /**
+     * Allows manipulation of order data
+     */
+    public function manipulateOrderWithPaymentData(): void
+    {
+        if ($this->shopgateOrder->getIsPaid()
+            && $this->magentoOrder->getBaseTotalDue()
+            && $this->magentoOrder->getPayment()
+        ) {
+            $this->magentoOrder->getPayment()->setShouldCloseParentTransaction(true);
+            $this->magentoOrder->getPayment()->registerCaptureNotification($this->shopgateOrder->getAmountComplete());
+            $this->magentoOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
+                               ->setIsCustomerNotified(false);
+        }
+    }
 }

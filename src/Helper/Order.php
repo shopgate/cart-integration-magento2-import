@@ -36,15 +36,11 @@ use Shopgate\Base\Model\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base;
 use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
-use Shopgate\Import\Helper\Order\Utility;
 use Shopgate\Import\Model\Payment\Factory;
 use Shopgate\Import\Model\Service\Import as ImportService;
 
 class Order
 {
-
-    /** @var Utility */
-    private $utility;
     /** @var Base */
     protected $sgOrder;
     /** @var SgLoggerInterface */
@@ -77,7 +73,6 @@ class Order
     private $paymentFactory;
 
     /**
-     * @param Utility                  $utility
      * @param Base                     $order
      * @param SgLoggerInterface        $log
      * @param Quote                    $quote
@@ -95,7 +90,6 @@ class Order
      * @param array                    $quoteMethods
      */
     public function __construct(
-        Utility $utility,
         Base $order,
         SgLoggerInterface $log,
         Quote $quote,
@@ -112,7 +106,6 @@ class Order
         Factory $paymentFactory,
         array $quoteMethods = []
     ) {
-        $this->utility           = $utility;
         $this->sgOrder           = $order;
         $this->log               = $log;
         $this->quote             = $quote;
@@ -248,16 +241,11 @@ class Order
      */
     protected function setOrderState()
     {
-        $orderStatus = $this->mageOrder->getPayment()->getMethodInstance()->getConfigData('order_status');
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
-        if ($orderState === MageOrder::STATE_HOLDED) {
-            if ($this->mageOrder->canHold()) {
-                $this->mageOrder->hold();
-            }
-
-            return;
-        }
-        $this->mageOrder->setState($orderState)->setStatus($orderStatus);
+        $this->paymentFactory->getPayment(
+            $this->sgOrder->getPaymentMethod(),
+            $this->mageOrder,
+            $this->sgOrder
+        )->setOrderStatus();
     }
 
     /**
@@ -277,18 +265,11 @@ class Order
      */
     protected function setOrderPayment()
     {
-//        $paymentMethod = $this->paymentFactory->getPayment(
-//            $this->sgOrder->getPaymentMethod(),
-//            $this->mageOrder,
-//            $this->sgOrder
-//        );
-//        $paymentMethodModel = $paymentMethod->getPaymentModel();
-        if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
-            $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
-            $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
-            $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
-                            ->setIsCustomerNotified(false);
-        }
+        $this->paymentFactory->getPayment(
+            $this->sgOrder->getPaymentMethod(),
+            $this->mageOrder,
+            $this->sgOrder
+        )->manipulateOrderWithPaymentData();
     }
 
     /**
