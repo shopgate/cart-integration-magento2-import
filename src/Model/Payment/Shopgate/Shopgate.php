@@ -28,6 +28,9 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Shopgate extends AbstractPayment
 {
+    const MODULE_CONFIG = 'Shopgate_Base';
+    const PAYMENT_CODE = 'shopgate';
+
     /**
      * Always valid as it is the fallback method
      *

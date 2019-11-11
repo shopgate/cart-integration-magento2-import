@@ -59,7 +59,6 @@ class Factory
     {
         if (!$this->paymentMethod || !$this->paymentMethod->isValid()) {
             $methodToLoad = $this->paymentMapping[$paymentMethod] ? : self::DEFAULT_PAYMENT_METHOD;
-            /** @var \Shopgate\Import\Model\Payment\AbstractPayment $methodInstance */
             $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create(
                 [
                     'magentoOrder' => $magentoOrder,

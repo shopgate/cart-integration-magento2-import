@@ -26,6 +26,7 @@ namespace Shopgate\Import\Model\Payment;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\Manager;
+use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Store\Model\ScopeInterface;
@@ -50,6 +51,8 @@ abstract class AbstractPayment
      */
     const MODULE_CONFIG = '';
 
+    const PAYMENT_CODE = '';
+
     /** @var ScopeConfigInterface */
     private $scopeConfig;
     /** @var MagentoOrder */
@@ -58,17 +61,21 @@ abstract class AbstractPayment
     private $shopgateOrder;
     /** @var Manager */
     private $moduleManager;
+    /** @var PaymentHelper */
+    private $paymentHelper;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         MagentoOrder $magentoOrder,
         ShopgateOrder $shopgateOrder,
-        Manager $moduleManager
+        Manager $moduleManager,
+        PaymentHelper $paymentHelper
     ) {
-        $this->scopeConfig   = $scopeConfig;
-        $this->magentoOrder  = $magentoOrder;
-        $this->shopgateOrder = $shopgateOrder;
-        $this->moduleManager = $moduleManager;
+        $this->scopeConfig          = $scopeConfig;
+        $this->magentoOrder         = $magentoOrder;
+        $this->shopgateOrder        = $shopgateOrder;
+        $this->moduleManager        = $moduleManager;
+        $this->paymentHelper        = $paymentHelper;
     }
 
     /**
@@ -88,16 +95,6 @@ abstract class AbstractPayment
     }
 
     /**
-     * Checks if a payment method is enabled
-     *
-     * @return bool
-     */
-    public function isEnabled(): bool
-    {
-        $this->scopeConfig->isSetFlag(static::XML_CONFIG_ENABLED, ScopeInterface::SCOPE_STORE);
-    }
-
-    /**
      * Check if the payment module is enabled
      *
      * @return bool
@@ -108,12 +105,23 @@ abstract class AbstractPayment
     }
 
     /**
+     * Checks if a payment method is enabled
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        $this->scopeConfig->isSetFlag(static::XML_CONFIG_ENABLED, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
      * Returns the concrete payment model instance
      *
-     * @return MethodInterface
+     * @return MethodInterface|null
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getPaymentModel(): MethodInterface
+    public function getPaymentModel(): ?MethodInterface
     {
-
+        return $this->isModuleActive() ? $this->paymentHelper->getMethodInstance(static::PAYMENT_CODE) : null;
     }
 }

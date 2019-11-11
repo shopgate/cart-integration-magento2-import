@@ -279,9 +279,10 @@ class Order
     {
 //        $paymentMethod = $this->paymentFactory->getPayment(
 //            $this->sgOrder->getPaymentMethod(),
-//            $this->sgOrder,
-//            $this->mageOrder
+//            $this->mageOrder,
+//            $this->sgOrder
 //        );
+//        $paymentMethodModel = $paymentMethod->getPaymentModel();
         if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
             $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
             $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
