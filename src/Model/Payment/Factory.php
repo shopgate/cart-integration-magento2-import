@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Model\Payment;
 
-use Magento\Sales\Model\Order as MagentoOrder;
-use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Factory
@@ -47,24 +45,13 @@ class Factory
 
     /**
      * @param string        $paymentMethod
-     * @param MagentoOrder  $magentoOrder
-     * @param ShopgateOrder $shopgateOrder
      *
      * @return \Shopgate\Import\Model\Payment\AbstractPayment
      */
-    public function getPayment(
-        string $paymentMethod,
-        MagentoOrder $magentoOrder,
-        ShopgateOrder $shopgateOrder
-    ): AbstractPayment {
+    public function getPayment(string $paymentMethod): AbstractPayment {
         if (!$this->paymentMethod || !$this->paymentMethod->isValid()) {
             $methodToLoad        = $this->paymentMapping[$paymentMethod] ? : self::DEFAULT_PAYMENT_METHOD;
-            $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create(
-                [
-                    'magentoOrder'  => $magentoOrder,
-                    'shopgateOrder' => $shopgateOrder
-                ]
-            );
+            $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create();
         }
 
         return $this->paymentMethod;

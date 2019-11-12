@@ -22,11 +22,9 @@
 
 namespace Shopgate\Import\Tests\Integration\Model\Payment;
 
-use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
-use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 
 class FactoryTest extends TestCase
@@ -35,10 +33,6 @@ class FactoryTest extends TestCase
     private $objectManager;
     /** @var PaymentFactory */
     private $paymentFactory;
-    /** @var MagentoOrder */
-    private $magentoOrder;
-    /** @var ShopgateOrder */
-    private $shopgateOrder;
 
     /**
      * Integration test preparation, creating mocks for Shopgate and Magento orders
@@ -47,8 +41,6 @@ class FactoryTest extends TestCase
     {
         $this->objectManager  = Bootstrap::getObjectManager();
         $this->paymentFactory = $this->objectManager->create(PaymentFactory::class);
-        $this->shopgateOrder  = $this->getMockBuilder(ShopgateOrder::class)->getMock();
-        $this->magentoOrder   = $this->getMockBuilder(MagentoOrder::class)->getMock();
     }
 
     /**
@@ -61,7 +53,7 @@ class FactoryTest extends TestCase
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
-        $paymentMethod = $this->paymentFactory->getPayment($methodCode, $this->magentoOrder, $this->shopgateOrder);
+        $paymentMethod = $this->paymentFactory->getPayment($methodCode);
 
         $this->assertEquals($expectedPaymentMethod, $paymentMethod->getPaymentModel()->getCode());
     }

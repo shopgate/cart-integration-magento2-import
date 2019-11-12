@@ -29,10 +29,10 @@ use Magento\Framework\Module\Manager;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Magento\Sales\Model\Order as MageOrder;
 use Magento\Store\Model\ScopeInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
+use Magento\Framework\Exception\LocalizedException;
 
 abstract class AbstractPayment
 {
@@ -51,16 +51,12 @@ abstract class AbstractPayment
     /**
      * The name of the module, as defined in etc/module.xml
      */
-    const MODULE_CONFIG = '';
+    const MODULE_NAME = '';
     /**
      * The code of the magento payment method
      */
     const PAYMENT_CODE = '';
 
-    /** @var MagentoOrder */
-    protected $magentoOrder;
-    /** @var ShopgateOrder */
-    protected $shopgateOrder;
     /** @var ScopeConfigInterface */
     private $scopeConfig;
     /** @var Manager */
@@ -72,23 +68,17 @@ abstract class AbstractPayment
 
     /**
      * @param ScopeConfigInterface $scopeConfig
-     * @param MageOrder            $magentoOrder
-     * @param ShopgateOrder        $shopgateOrder
      * @param Manager              $moduleManager
      * @param PaymentHelper        $paymentHelper
      * @param Utility              $utility
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        MagentoOrder $magentoOrder,
-        ShopgateOrder $shopgateOrder,
         Manager $moduleManager,
         PaymentHelper $paymentHelper,
         Utility $utility
     ) {
         $this->scopeConfig   = $scopeConfig;
-        $this->magentoOrder  = $magentoOrder;
-        $this->shopgateOrder = $shopgateOrder;
         $this->moduleManager = $moduleManager;
         $this->paymentHelper = $paymentHelper;
         $this->utility       = $utility;
@@ -105,7 +95,7 @@ abstract class AbstractPayment
      * Returns the concrete payment model instance
      *
      * @return MethodInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getPaymentModel(): ?MethodInterface
     {
@@ -127,7 +117,7 @@ abstract class AbstractPayment
      */
     public function isModuleActive(): bool
     {
-        return $this->moduleManager->isEnabled(static::MODULE_CONFIG);
+        return $this->moduleManager->isEnabled(static::MODULE_NAME);
     }
 
     /**
@@ -142,28 +132,39 @@ abstract class AbstractPayment
 
     /**
      * Allows manipulation of order data
+     *
+     * @param MagentoOrder  $magentoOrder
+     * @param ShopgateOrder $shopgateOrder
      */
-    public function manipulateOrderWithPaymentData(): void
+    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
     }
 
     /**
      * Sets order status based on configuration
+     *
+     * @param MagentoOrder  $magentoOrder
+     * @param ShopgateOrder $shopgateOrder
+     *
+     * @throws LocalizedException
      */
-    public function setOrderStatus(): void
+    public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatus = $this->shopgateOrder->getIsPaid()
+        $orderStatusConfig = $shopgateOrder->getIsPaid()
             ? static::XML_CONFIG_STATUS_PAID
             : static::XML_CONFIG_STATUS_NOT_PAID;
+        $orderStatus = $this->scopeConfig->getValue($orderStatusConfig, ScopeInterface::SCOPE_STORE);
 
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
-        if ($orderState === MagentoOrder::STATE_HOLDED) {
-            if ($this->magentoOrder->canHold()) {
-                $this->magentoOrder->hold();
+        if ($orderStatus) {
+            $orderState  = $this->utility->getStateForStatus($orderStatus);
+            if ($orderState === MagentoOrder::STATE_HOLDED) {
+                if ($magentoOrder->canHold()) {
+                    $magentoOrder->hold();
+                }
+
+                return;
             }
-
-            return;
+            $magentoOrder->setState($orderState)->setStatus($orderStatus);
         }
-        $this->magentoOrder->setState($orderState)->setStatus($orderStatus);
     }
 }

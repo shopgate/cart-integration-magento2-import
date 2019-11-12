@@ -24,17 +24,20 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Model\Payment\Shopgate;
 
+use Magento\Sales\Model\Order as MagentoOrder;
+use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Shopgate extends AbstractPayment
 {
-    const MODULE_CONFIG = 'Shopgate_Base';
-    const PAYMENT_CODE = 'shopgate';
+    const MODULE_NAME          = 'Shopgate_Base';
+    const PAYMENT_CODE           = 'shopgate';
+    const XML_CONFIG_STATUS_PAID = 'payment/shopgate/order_status';
 
     /**
      * Always valid as it is the fallback method
      *
-     * @return bool
+     * @inheritDoc
      */
     public function isValid(): bool
     {
@@ -42,17 +45,17 @@ class Shopgate extends AbstractPayment
     }
 
     /**
-     * Allows manipulation of order data
+     * @inheritDoc
      */
-    public function manipulateOrderWithPaymentData(): void
+    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        if ($this->shopgateOrder->getIsPaid()
-            && $this->magentoOrder->getBaseTotalDue()
-            && $this->magentoOrder->getPayment()
+        if ($shopgateOrder->getIsPaid()
+            && $magentoOrder->getBaseTotalDue()
+            && $magentoOrder->getPayment()
         ) {
-            $this->magentoOrder->getPayment()->setShouldCloseParentTransaction(true);
-            $this->magentoOrder->getPayment()->registerCaptureNotification($this->shopgateOrder->getAmountComplete());
-            $this->magentoOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
+            $magentoOrder->getPayment()->setShouldCloseParentTransaction(true);
+            $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete());
+            $magentoOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
                                ->setIsCustomerNotified(false);
         }
     }
