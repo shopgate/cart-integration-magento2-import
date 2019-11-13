@@ -27,9 +27,6 @@ use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 
-/**
- * @magentoAppIsolation enabled
- */
 class FactoryTest extends TestCase
 {
     /** @var ObjectManager $objectManager */
