@@ -22,6 +22,7 @@
 
 namespace Shopgate\Import\Test\Integration\Model\Payment;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
@@ -49,7 +50,7 @@ class FactoryTest extends TestCase
      *
      * @dataProvider paymentMethodProvider
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
