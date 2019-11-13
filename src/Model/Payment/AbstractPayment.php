@@ -111,7 +111,7 @@ abstract class AbstractPayment
     }
 
     /**
-     * Check if the payment module is enabled
+     * Check if the payment module is active
      *
      * @return bool
      */

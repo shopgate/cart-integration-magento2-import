@@ -44,9 +44,9 @@ class Factory
     }
 
     /**
-     * @param string        $paymentMethod
+     * @param string $paymentMethod
      *
-     * @return \Shopgate\Import\Model\Payment\AbstractPayment
+     * @return AbstractPayment
      */
     public function getPayment(string $paymentMethod): AbstractPayment
     {

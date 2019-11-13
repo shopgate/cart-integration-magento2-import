@@ -44,8 +44,8 @@ class FactoryTest extends TestCase
     }
 
     /**
-     * @param $methodCode
-     * @param $expectedPaymentMethod
+     * @param string $methodCode
+     * @param string $expectedPaymentMethod
      *
      * @dataProvider paymentMethodProvider
      *
@@ -61,7 +61,7 @@ class FactoryTest extends TestCase
     /**
      * Data provider for payment mapping integration test
      *
-     * @return array
+     * @return string[]
      */
     public function paymentMethodProvider(): array
     {
