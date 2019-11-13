@@ -30,7 +30,7 @@
     ],
     "psr-4": {
       "Shopgate\\Import\\": "src/",
-      "Shopgate\\Import\\Tests\\": "tests/"
+      "Shopgate\\Import\\Test\\": "src/Test"
     }
   }
 }

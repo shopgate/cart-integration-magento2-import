@@ -30,7 +30,7 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Shopgate extends AbstractPayment
 {
-    const MODULE_NAME          = 'Shopgate_Base';
+    const MODULE_NAME            = 'Shopgate_Base';
     const PAYMENT_CODE           = 'shopgate';
     const XML_CONFIG_STATUS_PAID = 'payment/shopgate/order_status';
 
