@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Changed
 - Payment mapping is now based on factories
 
+### Removed
+- Support for PHP < 7.1
+- Support for Magento < 2.2  
+
 ## [2.9.12] - 2019-07-18
 ### Fixed
 - Mapping of shipping method during order import
