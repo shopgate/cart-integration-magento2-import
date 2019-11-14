@@ -50,9 +50,13 @@ class Factory
      */
     public function getPayment(string $paymentMethod): AbstractPayment
     {
-        if (!$this->paymentMethod || !$this->paymentMethod->isValid()) {
+        if (!$this->paymentMethod) {
             $methodToLoad        = $this->paymentMapping[$paymentMethod] ?? self::DEFAULT_PAYMENT_METHOD;
             $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create();
+        }
+
+        if (!$this->paymentMethod->isValid()) {
+            $this->paymentMethod = $this->paymentMapping[self::DEFAULT_PAYMENT_METHOD]->create();
         }
 
         return $this->paymentMethod;

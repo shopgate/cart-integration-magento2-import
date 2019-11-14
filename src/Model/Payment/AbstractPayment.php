@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Model\Payment;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
+use Shopgate\Base\Api\Config\CoreInterface;
 use Magento\Framework\Module\Manager;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
@@ -57,7 +57,7 @@ abstract class AbstractPayment
      */
     const PAYMENT_CODE = '';
 
-    /** @var ScopeConfigInterface */
+    /** @var CoreInterface */
     private $scopeConfig;
     /** @var Manager */
     private $moduleManager;
@@ -67,13 +67,13 @@ abstract class AbstractPayment
     private $utility;
 
     /**
-     * @param ScopeConfigInterface $scopeConfig
+     * @param CoreInterface $scopeConfig
      * @param Manager              $moduleManager
      * @param PaymentHelper        $paymentHelper
      * @param Utility              $utility
      */
     public function __construct(
-        ScopeConfigInterface $scopeConfig,
+        CoreInterface $scopeConfig,
         Manager $moduleManager,
         PaymentHelper $paymentHelper,
         Utility $utility
@@ -127,7 +127,7 @@ abstract class AbstractPayment
      */
     public function isEnabled(): bool
     {
-        $this->scopeConfig->isSetFlag(static::XML_CONFIG_ENABLED, ScopeInterface::SCOPE_STORE);
+        return (bool) $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
     }
 
     /**
@@ -153,7 +153,7 @@ abstract class AbstractPayment
         $orderStatusConfig = $shopgateOrder->getIsPaid()
             ? static::XML_CONFIG_STATUS_PAID
             : static::XML_CONFIG_STATUS_NOT_PAID;
-        $orderStatus = $this->scopeConfig->getValue($orderStatusConfig, ScopeInterface::SCOPE_STORE);
+        $orderStatus = $this->scopeConfig->getConfigByPath($orderStatusConfig)->getValue();
 
         if ($orderStatus) {
             $orderState  = $this->utility->getStateForStatus($orderStatus);
