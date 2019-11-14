@@ -36,16 +36,17 @@ use Shopgate\Base\Model\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base;
 use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
-use Shopgate\Import\Helper\Order\Utility;
+use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 use Shopgate\Import\Model\Service\Import as ImportService;
 
 class Order
 {
-
-    /** @var Utility */
-    private $utility;
     /** @var Base */
     protected $sgOrder;
+    /** @var MageOrder */
+    protected $mageOrder;
+    /** @var ManagerInterface */
+    protected $eventManager;
     /** @var SgLoggerInterface */
     private $log;
     /** @var Quote */
@@ -56,8 +57,6 @@ class Order
     private $quoteManagement;
     /** @var OrderRepository */
     private $orderRepository;
-    /** @var MageOrder */
-    protected $mageOrder;
     /** @var OrderRepositoryInterface */
     private $sgOrderRepository;
     /** @var CoreInterface */
@@ -70,11 +69,10 @@ class Order
     private $quoteRepository;
     /** @var Shipping */
     private $shippingHelper;
-    /** @var ManagerInterface */
-    protected $eventManager;
+    /** @var PaymentFactory */
+    private $paymentFactory;
 
     /**
-     * @param Utility                  $utility
      * @param Base                     $order
      * @param SgLoggerInterface        $log
      * @param Quote                    $quote
@@ -88,10 +86,10 @@ class Order
      * @param Shopgate\Order           $localSgOrder
      * @param Shipping                 $shippingHelper
      * @param ManagerInterface         $eventManager
+     * @param PaymentFactory           $paymentFactory
      * @param array                    $quoteMethods
      */
     public function __construct(
-        Utility $utility,
         Base $order,
         SgLoggerInterface $log,
         Quote $quote,
@@ -105,9 +103,9 @@ class Order
         Shopgate\Order $localSgOrder,
         Shipping $shippingHelper,
         ManagerInterface $eventManager,
+        PaymentFactory $paymentFactory,
         array $quoteMethods = []
     ) {
-        $this->utility           = $utility;
         $this->sgOrder           = $order;
         $this->log               = $log;
         $this->quote             = $quote;
@@ -122,6 +120,7 @@ class Order
         $this->localSgOrder      = $localSgOrder;
         $this->shippingHelper    = $shippingHelper;
         $this->eventManager      = $eventManager;
+        $this->paymentFactory    = $paymentFactory;
     }
 
     /**
@@ -139,6 +138,18 @@ class Order
         }
 
         return $this->mageOrder;
+    }
+
+    /**
+     * Executes after order is fully loaded and updated
+     */
+    public function setEndUpdate()
+    {
+        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'))
+                        ->setIsCustomerNotified(false);
+
+        $this->orderRepository->save($this->mageOrder);
+        $this->sgOrderRepository->update($this->localSgOrder);
     }
 
     /**
@@ -198,18 +209,6 @@ class Order
     }
 
     /**
-     * Executes after order is fully loaded and updated
-     */
-    public function setEndUpdate()
-    {
-        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'))
-                        ->setIsCustomerNotified(false);
-
-        $this->orderRepository->save($this->mageOrder);
-        $this->sgOrderRepository->update($this->localSgOrder);
-    }
-
-    /**
      * Checks if payment should be updated for order
      */
     protected function setUpdatePayment()
@@ -218,6 +217,15 @@ class Order
             $this->log->debug('# Payment requires an update');
             $this->setOrderPayment();
         }
+    }
+
+    /**
+     * Manipulate payments according to payment method
+     */
+    protected function setOrderPayment()
+    {
+        $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod())
+                             ->manipulateOrderWithPaymentData($this->mageOrder, $this->sgOrder);
     }
 
     /**
@@ -239,19 +247,13 @@ class Order
 
     /**
      * Set correct order status by payment
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function setOrderState()
     {
-        $orderStatus = $this->mageOrder->getPayment()->getMethodInstance()->getConfigData('order_status');
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
-        if ($orderState === MageOrder::STATE_HOLDED) {
-            if ($this->mageOrder->canHold()) {
-                $this->mageOrder->hold();
-            }
-
-            return;
-        }
-        $this->mageOrder->setState($orderState)->setStatus($orderStatus);
+        $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod())
+                             ->setOrderStatus($this->mageOrder, $this->sgOrder);
     }
 
     /**
@@ -262,21 +264,6 @@ class Order
         $this->mageOrder->addStatusHistoryComment(
             __('[SHOPGATE] Order added by Shopgate # %1', $this->sgOrder->getOrderNumber())
         )->setIsCustomerNotified(false);
-    }
-
-    /**
-     * Manipulate payments according to payment method
-     *
-     * TODO: once we have factories, move it there
-     */
-    protected function setOrderPayment()
-    {
-        if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
-            $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
-            $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
-            $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
-                            ->setIsCustomerNotified(false);
-        }
     }
 
     /**

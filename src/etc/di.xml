@@ -33,4 +33,11 @@
             </argument>
         </arguments>
     </type>
+    <type name="Shopgate\Import\Model\Payment\Factory">
+        <arguments>
+            <argument name="paymentMapping" xsi:type="array">
+                <item name="SHOPGATE" xsi:type="object">Shopgate\Import\Model\Payment\Shopgate\ShopgateFactory</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
