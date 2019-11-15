@@ -51,7 +51,9 @@ class Factory
     public function getPayment(string $paymentMethod): AbstractPayment
     {
         if (!$this->paymentMethod) {
-            $methodToLoad        = $this->paymentMapping[$paymentMethod] ?? self::DEFAULT_PAYMENT_METHOD;
+            $methodToLoad        = isset($this->paymentMapping[$paymentMethod])
+                ? $paymentMethod
+                : self::DEFAULT_PAYMENT_METHOD;
             $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create();
         }
 

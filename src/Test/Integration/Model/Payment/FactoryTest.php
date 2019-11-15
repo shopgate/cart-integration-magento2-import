@@ -28,6 +28,9 @@ use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 
+/**
+ * @magentoDbIsolation enabled
+ */
 class FactoryTest extends TestCase
 {
     /** @var ObjectManager $objectManager */
@@ -51,6 +54,8 @@ class FactoryTest extends TestCase
      * @dataProvider paymentMethodProvider
      *
      * @throws LocalizedException
+     *
+     * @magentoConfigFixture default/payment/braintree/active 1
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
@@ -67,7 +72,8 @@ class FactoryTest extends TestCase
     public function paymentMethodProvider(): array
     {
         return [
-            'return shopgate as default payment method' => ['PREPAY', 'shopgate']
+            'return shopgate as default payment method' => ['PREPAY', 'shopgate'],
+            'Braintree Credit Card' => ['BRAINTR_CC', 'braintree']
         ];
     }
 }

@@ -38,6 +38,7 @@ use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 use Shopgate\Import\Model\Service\Import as ImportService;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class Order
 {
@@ -71,6 +72,8 @@ class Order
     private $shippingHelper;
     /** @var PaymentFactory */
     private $paymentFactory;
+    /** @var SerializerInterface */
+    private $serializer;
 
     /**
      * @param Base                     $order
@@ -87,6 +90,7 @@ class Order
      * @param Shipping                 $shippingHelper
      * @param ManagerInterface         $eventManager
      * @param PaymentFactory           $paymentFactory
+     * @param SerializerInterface      $serializer
      * @param array                    $quoteMethods
      */
     public function __construct(
@@ -104,6 +108,7 @@ class Order
         Shipping $shippingHelper,
         ManagerInterface $eventManager,
         PaymentFactory $paymentFactory,
+        SerializerInterface $serializer,
         array $quoteMethods = []
     ) {
         $this->sgOrder           = $order;
@@ -121,6 +126,7 @@ class Order
         $this->shippingHelper    = $shippingHelper;
         $this->eventManager      = $eventManager;
         $this->paymentFactory    = $paymentFactory;
+        $this->serializer        = $serializer;
     }
 
     /**
