@@ -125,7 +125,7 @@ class CreditCard extends AbstractPayment
 
         $extensionAttributes = $magentoOrder->getPayment()->getExtensionAttributes();
         $extensionAttributes->setVaultPaymentToken($paymentToken);
-        $magentoOrder->getPayment()->setExtensionAttributes($extensionAttributes)->save();
+        $magentoOrder->getPayment()->setExtensionAttributes($extensionAttributes);
         $magentoOrder->getPayment()->save();
 
         // todo-sg: create transaction and also invoice if order is paid
