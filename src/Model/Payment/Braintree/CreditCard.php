@@ -123,6 +123,7 @@ class CreditCard extends AbstractPayment
         $magentoOrder->getPayment()->setData([
             'method'                 => $this->getPaymentModel()->getCode(),
             'additional_information' => $this->getAdditionalPaymentData($shopgateOrder),
+            'transaction_id'         => $paymentInformation['transaction_id'],
             'cc_trans_id'            => $paymentInformation['transaction_id'],
             'last_trans_id'          => $paymentInformation['transaction_id'],
             'cc_owner'               => $usedCreditCard['holder'],
@@ -143,7 +144,6 @@ class CreditCard extends AbstractPayment
             $amount = $magentoOrder->getPayment()->formatAmount($shopgateOrder->getAmountComplete(), true);
             $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
             $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
-            $magentoOrder->getPayment()->addTransaction(Transaction::TYPE_AUTH);
             $magentoOrder->getPayment()->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
         }
     }
