@@ -94,4 +94,14 @@ class Braintree
     {
         return sprintf('xxxx-%s', str_replace('*', '', $ccNumber));
     }
+
+    /**
+     * @param string $ccNumber
+     *
+     * @return string
+     */
+    public function getLastCCNumbers(string $ccNumber): string
+    {
+        return str_replace('*', '', $ccNumber);
+    }
 }

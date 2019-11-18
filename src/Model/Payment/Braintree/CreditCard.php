@@ -103,7 +103,7 @@ class CreditCard extends AbstractPayment
         $paymentToken        = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
         $paymentTokenDetails = [
             'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
-            'maskedCC'       => str_replace('*', '', $paymentInformation['credit_card']['masked_number']),
+            'maskedCC'       => $this->helper->getLastCCNumbers($paymentInformation['credit_card']['masked_number']),
             'expirationData' => $this->helper->formatExpirationDate(
                 $paymentInformation['credit_card']['expiry_month'],
                 $paymentInformation['credit_card']['expiry_year']
@@ -128,7 +128,7 @@ class CreditCard extends AbstractPayment
             'cc_owner'               => $usedCreditCard['holder'],
             'cc_type'                => $this->getMappedCCType($usedCreditCard['type']),
             'cc_number_enc'          => $usedCreditCard['masked_number'],
-            'cc_last_4'              => str_replace('*', '', $usedCreditCard['masked_number']),
+            'cc_last_4'              => $this->helper->getLastCCNumbers($usedCreditCard['masked_number']),
             'cc_exp_month'           => $this->helper->formatExpirationMonth($usedCreditCard['expiry_month']),
             'cc_exp_year'            => $paymentInformation['credit_card']['expiry_year']
         ]);
