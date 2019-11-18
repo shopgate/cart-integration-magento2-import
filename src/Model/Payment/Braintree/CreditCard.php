@@ -30,10 +30,12 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Vault\Api\Data\PaymentTokenFactoryInterface;
 use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
+use Shopgate\Import\Helper\Payment\Braintree as Helper;
 use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class CreditCard extends AbstractPayment
@@ -42,7 +44,7 @@ class CreditCard extends AbstractPayment
     const PAYMENT_CODE       = 'braintree';
     const XML_CONFIG_ENABLED = 'payment/braintree/active';
     const STATUS_AUTHORIZED  = 'authorized';
-    const CREDIT_CARD_MAP    = [
+    const CREDIT_CARD_TYPE_MAP = [
         'visa'       => 'VI',
         'maestro'    => 'MI',
         'mastercard' => 'MC',
@@ -58,6 +60,8 @@ class CreditCard extends AbstractPayment
     private $orderPaymentRepository;
     /** @var SerializerInterface */
     private $serializer;
+    /** @var Helper */
+    private $helper;
 
     /**
      * @param CoreInterface                   $scopeConfig
@@ -67,6 +71,7 @@ class CreditCard extends AbstractPayment
      * @param OrderPaymentRepositoryInterface $orderPaymentRepository
      * @param PaymentTokenFactoryInterface    $paymentTokenFactory
      * @param SerializerInterface             $serializer
+     * @param Helper                          $helper
      */
     public function __construct(
         CoreInterface $scopeConfig,
@@ -75,13 +80,15 @@ class CreditCard extends AbstractPayment
         Utility $utility,
         OrderPaymentRepositoryInterface $orderPaymentRepository,
         PaymentTokenFactoryInterface $paymentTokenFactory,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        Helper $helper
     ) {
         parent::__construct($scopeConfig, $moduleManager, $paymentHelper, $utility);
 
         $this->paymentTokenFactory    = $paymentTokenFactory;
         $this->orderPaymentRepository = $orderPaymentRepository;
         $this->serializer             = $serializer;
+        $this->helper                 = $helper;
     }
 
     /**
@@ -91,21 +98,24 @@ class CreditCard extends AbstractPayment
      */
     public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $paymentInformation = $shopgateOrder->getPaymentInfos();
-        $usedCreditCard     = $paymentInformation['credit_card'];
-        $paymentToken       = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
+        $paymentInformation  = $shopgateOrder->getPaymentInfos();
+        $usedCreditCard      = $paymentInformation['credit_card'];
+        $paymentToken        = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
+        $paymentTokenDetails = [
+            'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
+            'maskedCC'       => str_replace('*', '', $paymentInformation['credit_card']['masked_number']),
+            'expirationData' => $this->helper->formatExpirationDate(
+                $paymentInformation['credit_card']['expiry_month'],
+                $paymentInformation['credit_card']['expiry_year']
+            )
+        ];
         $paymentToken->setGatewayToken($paymentInformation['processor_auth_code'])
                      ->setExpiresAt(
-                         $this->calculateExpirationDate($usedCreditCard['expiry_year'], $usedCreditCard['expiry_month'])
-                     )->setTokenDetails($this->serializer->serialize([
-                'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
-                'maskedCC'       => str_replace('*', '', $paymentInformation['credit_card']['masked_number']),
-                'expirationData' => sprintf(
-                    '%s/%s',
-                    sprintf('%02d', $paymentInformation['credit_card']['expiry_month']),
-                    $paymentInformation['credit_card']['expiry_year']
-                )
-            ]));
+                         $this->helper->calculateExpirationDate(
+                             $usedCreditCard['expiry_year'],
+                             $usedCreditCard['expiry_month']
+                         )
+                     )->setTokenDetails($this->serializer->serialize($paymentTokenDetails));
 
         $orderPayment = $this->orderPaymentRepository->get($magentoOrder->getPayment()->getEntityId());
         $this->orderPaymentRepository->delete($orderPayment);
@@ -115,11 +125,11 @@ class CreditCard extends AbstractPayment
             'additional_information' => $this->getAdditionalPaymentData($shopgateOrder),
             'cc_trans_id'            => $paymentInformation['transaction_id'],
             'last_trans_id'          => $paymentInformation['transaction_id'],
-            'cc_owner'               => $paymentInformation['credit_card']['holder'],
-            'cc_type'                => $this->getMappedCCType($paymentInformation['credit_card']['type']),
-            'cc_number_enc'          => $paymentInformation['credit_card']['masked_number'],
-            'cc_last_4'              => str_replace('*', '', $paymentInformation['credit_card']['masked_number']),
-            'cc_exp_month'           => sprintf('%02d', $paymentInformation['credit_card']['expiry_month']),
+            'cc_owner'               => $usedCreditCard['holder'],
+            'cc_type'                => $this->getMappedCCType($usedCreditCard['type']),
+            'cc_number_enc'          => $usedCreditCard['masked_number'],
+            'cc_last_4'              => str_replace('*', '', $usedCreditCard['masked_number']),
+            'cc_exp_month'           => $this->helper->formatExpirationMonth($usedCreditCard['expiry_month']),
             'cc_exp_year'            => $paymentInformation['credit_card']['expiry_year']
         ]);
 
@@ -129,45 +139,23 @@ class CreditCard extends AbstractPayment
         $magentoOrder->getPayment()->save();
 
         // todo-sg: create transaction and also invoice if order is paid
-
         if ($paymentInformation['status'] === self::STATUS_AUTHORIZED) {
+            $amount = $magentoOrder->getPayment()->formatAmount($shopgateOrder->getAmountComplete(), true);
+            $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
+            $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
+            $magentoOrder->getPayment()->addTransaction(Transaction::TYPE_AUTH);
             $magentoOrder->getPayment()->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
         }
-    }
-
-    /**
-     * @param string $expirationYear
-     * @param string $expirationMonth
-     *
-     * @return string
-     * @throws Exception
-     */
-    private function calculateExpirationDate(int $expirationYear, int $expirationMonth): string
-    {
-        $expDate = new \DateTime(
-            $expirationYear
-            . '-'
-            . $expirationMonth
-            . '-'
-            . '01'
-            . ' '
-            . '00:00:00',
-            new \DateTimeZone('UTC')
-        );
-        $expDate->add(new \DateInterval('P1M'));
-
-        return $expDate->format('Y-m-d 00:00:00');
     }
 
     /**
      * @param string $ccType
      *
      * @return string
-     * @throws Exception
      */
     private function getMappedCCType(string $ccType): string
     {
-        return static::CREDIT_CARD_MAP[$ccType];
+        return static::CREDIT_CARD_TYPE_MAP[$ccType];
     }
 
     /**
@@ -182,8 +170,12 @@ class CreditCard extends AbstractPayment
             'processorAuthorizationCode' => $paymentInformation['processor_auth_code'],
             'processorResponseCode'      => $paymentInformation['processor_response_code'],
             'processorResponseText'      => $paymentInformation['processor_response_text'],
-            'cc_number'                  => '', // todo-sg: calculate it
-            'cc_type'                    => '' // todo-sg: calculate it
+            'cc_number'                  => $this->helper->formatVisibleCCNumber(
+                $paymentInformation['credit_card']['masked_number']
+            ),
+            'cc_type'                    => $this->helper->formatVisibleCCType(
+                $this->getMappedCCType($paymentInformation['credit_card']['type'])
+            )
         ];
     }
 
