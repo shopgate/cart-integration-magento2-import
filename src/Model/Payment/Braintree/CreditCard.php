@@ -139,11 +139,13 @@ class CreditCard extends AbstractPayment
         $magentoOrder->getPayment()->setExtensionAttributes($extensionAttributes);
         $magentoOrder->getPayment()->save();
 
-        // todo-sg: create transaction and also invoice if order is paid
-        if ($paymentInformation['status'] === self::STATUS_AUTHORIZED) {
-            $amount = $magentoOrder->getPayment()->formatAmount($shopgateOrder->getAmountComplete(), true);
-            $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
-            $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
+        $amount = $magentoOrder->getPayment()->formatAmount($shopgateOrder->getAmountComplete(), true);
+        $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
+        $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
+
+        if ($shopgateOrder->getIsPaid()) {
+            $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
+        } else {
             $magentoOrder->getPayment()->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
         }
     }
