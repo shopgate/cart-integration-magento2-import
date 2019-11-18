@@ -142,6 +142,7 @@ class CreditCard extends AbstractPayment
         $amount = $magentoOrder->getPayment()->formatAmount($shopgateOrder->getAmountComplete(), true);
         $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
         $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
+        $magentoOrder->getPayment()->setIsTransactionClosed(0);
 
         if ($shopgateOrder->getIsPaid()) {
             $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
