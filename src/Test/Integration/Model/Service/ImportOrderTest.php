@@ -88,7 +88,7 @@ class ImportOrderTest extends TestCase
      *
      * @throws ShopgateLibraryException
      *
-     * @dataProvider paymentDataProvider
+     * @dataProvider         paymentDataProvider
      * @magentoConfigFixture default/payment/shopgate/order_status processing
      * @magentoConfigFixture current_store payment/braintree/active 1
      */
@@ -121,7 +121,7 @@ class ImportOrderTest extends TestCase
             ]
         );
 
-        $result = $this->importClass->addOrder($shopgateOrder);
+        $this->orderHolder[] = $this->importClass->addOrder($shopgateOrder);
         /** @var \Shopgate\Import\Helper\Order $sgOrder */
         $sgOrder = Bootstrap::getObjectManager()->get('Shopgate\Import\Helper\Order');
         /** @var \Magento\Sales\Model\Order $order */
@@ -136,7 +136,7 @@ class ImportOrderTest extends TestCase
     public function paymentDataProvider(): array
     {
         return [
-            'Braintree Credit Card' => [
+            'Braintree Credit Card'     => [
                 'braintree',
                 [
                     'shopgate_payment_name'   => 'Credit card (Braintree)',
@@ -161,8 +161,8 @@ class ImportOrderTest extends TestCase
             'Not mapped payment method' => [
                 'shopgate',
                 [
-                    'shopgate_payment_name'   => 'Unknown',
-                    'status'                  => 'authorized'
+                    'shopgate_payment_name' => 'Unknown',
+                    'status'                => 'authorized'
                 ],
                 'SOMETHING_UNKNOWN',
                 'NEW'
