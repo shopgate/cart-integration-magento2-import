@@ -158,11 +158,11 @@ class Quote extends \Shopgate\Base\Helper\Quote
      */
     protected function setPayment()
     {
-        $orderPayment = $this->paymentFactory->getPayment($this->sgBase->getPaymentMethod());
+        $defaultPayment =  $this->paymentFactory->getPayment(strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD));
         $this->quote->getPayment()->importData(
             [
-                'method'                              => strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD),
-                PaymentInterface::KEY_ADDITIONAL_DATA => $orderPayment->getAdditionalPaymentData($this->sgBase)
+                'method'                              => $defaultPayment->getPaymentModel()->getCode(),
+                PaymentInterface::KEY_ADDITIONAL_DATA => $defaultPayment->getAdditionalPaymentData($this->sgBase)
             ]
         );
         $this->quote->getPayment()->setParentTransactionId($this->sgBase->getPaymentTransactionNumber());

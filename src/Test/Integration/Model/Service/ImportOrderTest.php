@@ -20,28 +20,36 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Service;
 
+use PHPUnit\Framework\TestCase;
 use Shopgate\Base\Tests\Bootstrap;
 use Shopgate\Base\Tests\Integration\SgDataManager;
+use ShopgateLibraryException;
 
 /**
  * @coversDefaultClass Shopgate\Import\Model\Service\Import
+ *
+ * @magentoAppIsolation enabled
+ * @magentoDbIsolation  enabled
+ * @magentoAppArea      frontend
  */
-class ImportOrderTest extends \PHPUnit\Framework\TestCase
+class ImportOrderTest extends TestCase
 {
     /** @var \Shopgate\Import\Helper\Order */
-    protected $orderClass;
+    private $orderClass;
     /** @var \Shopgate\Import\Model\Service\Import */
-    protected $importClass;
+    private $importClass;
     /** @var array - list of created orders to clean up */
-    protected $orderHolder = [];
+    private $orderHolder = [];
     /** @var \Magento\Sales\Api\OrderRepositoryInterface */
-    protected $orderRepository;
+    private $orderRepository;
     /** @var SgDataManager */
-    protected $dataManager;
+    private $dataManager;
 
-    public function setUp()
+    public function setUp(): void
     {
         $objectManager         = Bootstrap::getObjectManager();
         $this->importClass     = $objectManager->create('Shopgate\Import\Model\Service\Import');
@@ -59,7 +67,7 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
      * @dataProvider simpleOrderProvider
      * @throws \ShopgateLibraryException
      */
-    public function testOrderImport(\ShopgateOrder $order)
+    public function testOrderImport(\ShopgateOrder $order): void
     {
         $result = $this->importClass->addOrder($order);
         /** @var \Shopgate\Import\Helper\Order $sgOrder */
@@ -73,9 +81,99 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param string $expectedPaymentCode
+     * @param array  $paymentInformation
+     * @param string $paymentMethod
+     * @param string $paymentGroup
+     *
+     * @throws ShopgateLibraryException
+     *
+     * @dataProvider paymentDataProvider
+     * @magentoConfigFixture default/payment/shopgate/order_status processing
+     * @magentoConfigFixture current_store payment/braintree/active 1
+     */
+    public function testPaymentMapping(
+        string $expectedPaymentCode,
+        array $paymentInformation,
+        string $paymentMethod,
+        string $paymentGroup
+    ): void {
+        $dataManager = new SgDataManager();
+
+        $shopgateOrder = new \ShopgateOrder(
+            [
+                'order_number'               => rand(1000000000, 9999999999),
+                'is_paid'                    => 1,
+                'payment_time'               => null,
+                'payment_transaction_number' => '8654415',
+                'mail'                       => 'shopgate@shopgate.com',
+                'amount_shop_payment'        => '5.00',
+                'amount_complete'            => '149.85',
+                'shipping_infos'             => ['amount' => '4.90'],
+                'invoice_address'            => $dataManager->getGermanAddress(),
+                'delivery_address'           => $dataManager->getGermanAddress(false),
+                'external_coupons'           => [],
+                'shopgate_coupons'           => [],
+                'items'                      => [$dataManager->getSimpleProduct()],
+                'payment_infos'              => $paymentInformation,
+                'payment_method'             => $paymentMethod,
+                'payment_group'              => $paymentGroup
+            ]
+        );
+
+        $result = $this->importClass->addOrder($shopgateOrder);
+        /** @var \Shopgate\Import\Helper\Order $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get('Shopgate\Import\Helper\Order');
+        /** @var \Magento\Sales\Model\Order $order */
+        $order = $sgOrder->loadMethods([]);
+
+        $this->assertEquals($expectedPaymentCode, $order->getPayment()->getMethod());
+    }
+
+    /**
      * @return array
      */
-    public function simpleOrderProvider()
+    public function paymentDataProvider(): array
+    {
+        return [
+            'Braintree Credit Card' => [
+                'braintree',
+                [
+                    'shopgate_payment_name'   => 'Credit card (Braintree)',
+                    'status'                  => 'authorized',
+                    'transaction_id'          => '7mwm7q4a',
+                    'transaction_type'        => 'sale',
+                    'processor_auth_code'     => '02880Q',
+                    'processor_response_code' => '1000',
+                    'processor_response_text' => 'Approved',
+                    'risk_data'               => [],
+                    'credit_card'             => [
+                        'holder'        => 'Testi Test',
+                        'masked_number' => '************9596',
+                        'type'          => 'mastercard',
+                        'expiry_year'   => 2021,
+                        'expiry_month'  => 2,
+                    ]
+                ],
+                'BRAINTR_CC',
+                'CC'
+            ],
+            'Not mapped payment method' => [
+                'shopgate',
+                [
+                    'shopgate_payment_name'   => 'Unknown',
+                    'status'                  => 'authorized'
+                ],
+                'SOMETHING_UNKNOWN',
+                'NEW'
+            ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function simpleOrderProvider(): array
     {
         $dataManager = new SgDataManager();
 
@@ -109,7 +207,7 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
     /**
      * Delete all created orders & quotes
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         /** @var \Magento\Framework\Registry $registry */
         $registry = Bootstrap::getObjectManager()->get('\Magento\Framework\Registry');
