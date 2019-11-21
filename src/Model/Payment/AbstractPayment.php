@@ -30,32 +30,32 @@ use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Shopgate\Base\Api\Config\CoreInterface;
+use Shopgate\Base\Model\Payment\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
-use Shopgate\Base\Model\Payment\Shopgate;
 
 abstract class AbstractPayment
 {
     /**
      * The config path to module enabled
      */
-    const XML_CONFIG_ENABLED = '';
+    protected const XML_CONFIG_ENABLED = '';
     /**
      * The config path to module's paid status
      */
-    const XML_CONFIG_STATUS_PAID = '';
+    protected const XML_CONFIG_STATUS_PAID = '';
     /**
      * The config path to module's not paid status
      */
-    const XML_CONFIG_STATUS_NOT_PAID = '';
+    protected const XML_CONFIG_STATUS_NOT_PAID = '';
     /**
      * The name of the module, as defined in etc/module.xml
      */
-    const MODULE_NAME = '';
+    protected const MODULE_NAME = '';
     /**
      * The code of the magento payment method
      */
-    const PAYMENT_CODE = '';
+    protected const PAYMENT_CODE = '';
 
     /** @var CoreInterface */
     private $scopeConfig;

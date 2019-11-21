@@ -24,6 +24,12 @@ namespace Shopgate\Import\Helper;
 
 use Magento\Framework\Api\SimpleDataObjectConverter;
 use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\MailException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Quote\Model\QuoteRepository;
@@ -38,7 +44,7 @@ use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 use Shopgate\Import\Model\Service\Import as ImportService;
-use Magento\Framework\Serialize\SerializerInterface;
+use ShopgateLibraryException;
 
 class Order
 {
@@ -161,11 +167,11 @@ class Order
     /**
      * Creates the order then we can continue loading on $this->mageOrder
      *
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\InputException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \ShopgateLibraryException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws NoSuchEntityException
+     * @throws ShopgateLibraryException
+     * @throws LocalizedException
      */
     protected function setStartAdd()
     {
@@ -181,7 +187,7 @@ class Order
         $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
         $order = $this->quoteManagement->submit($quote);
         if (null === $order) {
-            throw new \ShopgateLibraryException(\ShopgateLibraryException::PLUGIN_ORDER_ITEM_NOT_FOUND);
+            throw new ShopgateLibraryException(ShopgateLibraryException::PLUGIN_ORDER_ITEM_NOT_FOUND);
         }
         $this->mageOrder = $order;
         $this->eventManager->dispatch('checkout_submit_all_after', ['order' => $this->mageOrder, 'quote' => $quote]);
@@ -198,9 +204,9 @@ class Order
     /**
      * Updates the order
      *
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \ShopgateLibraryException
-     * @throws \Magento\Framework\Exception\InputException
+     * @throws NoSuchEntityException
+     * @throws ShopgateLibraryException
+     * @throws InputException
      */
     protected function setStartUpdate()
     {
@@ -208,7 +214,7 @@ class Order
         $this->log->debug('## Order-Number: ' . $orderNumber);
         $this->localSgOrder = $this->sgOrderRepository->checkOrderExists($orderNumber);
         if (!$this->localSgOrder->getShopgateOrderId()) {
-            throw new \ShopgateLibraryException(\ShopgateLibraryException::PLUGIN_ORDER_NOT_FOUND);
+            throw new ShopgateLibraryException(ShopgateLibraryException::PLUGIN_ORDER_NOT_FOUND);
         }
 
         $this->mageOrder = $this->orderRepository->get($this->localSgOrder->getOrderId());
@@ -230,14 +236,18 @@ class Order
      */
     protected function setOrderPayment()
     {
-        $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod())
-                             ->manipulateOrderWithPaymentData($this->mageOrder, $this->sgOrder);
+        $payment = $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod());
+        $payment->manipulateOrderWithPaymentData($this->mageOrder, $this->sgOrder);
+        //todo-sg: test code, this saves transaction it seems?
+        $this->orderRepository->save($this->mageOrder); // saves payment
+        $order = $this->orderRepository->get($this->mageOrder->getId()); //todo-sg: not sure needed
+        $order->getPayment()->capture();
     }
 
     /**
      * Checks if shipments should be updated for an existing order
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function setUpdateShipping()
     {
@@ -254,7 +264,7 @@ class Order
     /**
      * Set correct order status by payment
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function setOrderState()
     {
@@ -284,7 +294,7 @@ class Order
     /**
      * Send order notification if activated in config
      *
-     * @throws \Magento\Framework\Exception\MailException
+     * @throws MailException
      */
     protected function setOrderNotification()
     {
