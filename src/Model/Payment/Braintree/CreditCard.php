@@ -30,7 +30,6 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Vault\Api\Data\PaymentTokenFactoryInterface;
 use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
@@ -119,7 +118,6 @@ class CreditCard extends AbstractPayment
 
         $orderPayment = $this->orderPaymentRepository->get($magentoOrder->getPayment()->getEntityId());
         $this->orderPaymentRepository->delete($orderPayment);
-
         $magentoOrder->getPayment()->setData([
             'method'                 => $this->getPaymentModel()->getCode(),
             'additional_information' => $this->getAdditionalPaymentData($shopgateOrder),
@@ -143,12 +141,16 @@ class CreditCard extends AbstractPayment
         $magentoOrder->getPayment()->setBaseAmountAuthorized($amount);
         $magentoOrder->getPayment()->setShouldCloseParentTransaction(false);
         $magentoOrder->getPayment()->setIsTransactionClosed(0);
-
+        $magentoOrder->getPayment()->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
+        $magentoOrder->getPayment()->save();
         if ($shopgateOrder->getIsPaid()) {
-            $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
-        } else {
-            $magentoOrder->getPayment()->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
+            /* todo-sg: check if we always need the real capture or just the registerCaptureNotification
+             * (in case braintree payment has already been authorized and captured at Shopgate to avoid re-capturing)
+             */
+            $magentoOrder->getPayment()->capture();
+//            $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
         }
+
     }
 
     /**
@@ -168,7 +170,7 @@ class CreditCard extends AbstractPayment
     {
         $paymentInformation = $shopgateOrder->getPaymentInfos();
 
-        return [
+        $additionalPaymentData = [
             'method_title'               => $paymentInformation['shopgate_payment_name'],
             'processorAuthorizationCode' => $paymentInformation['processor_auth_code'],
             'processorResponseCode'      => $paymentInformation['processor_response_code'],
@@ -180,6 +182,13 @@ class CreditCard extends AbstractPayment
                 $this->getMappedCCType($paymentInformation['credit_card']['type'])
             )
         ];
+
+        if (!empty($paymentInformation['risk_data'])) {
+            $additionalPaymentData['riskDataDecision'] = $paymentInformation['risk_data']['decision'];
+            $additionalPaymentData['riskDataId'] = $paymentInformation['risk_data']['id'];
+        }
+
+        return $additionalPaymentData;
     }
 
     /**
