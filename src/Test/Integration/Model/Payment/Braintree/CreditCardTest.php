@@ -125,7 +125,6 @@ class CreditCardTest extends TestCase
         $this->assertFalse($authorisationTransaction);
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
-
     }
 
     /**
