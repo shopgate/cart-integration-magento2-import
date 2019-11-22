@@ -28,6 +28,7 @@ use PHPUnit\Framework\TestCase;
 use Shopgate\Base\Tests\Bootstrap;
 use Shopgate\Base\Tests\Integration\SgDataManager;
 use ShopgateLibraryException;
+use Shopgate\Import\Test\Integration\Data\Payment\Braintree\CreditCard;
 
 /**
  * @coversDefaultClass Shopgate\Import\Model\Service\Import
@@ -138,23 +139,7 @@ class ImportOrderTest extends TestCase
         return [
             'Braintree Credit Card'     => [
                 'braintree',
-                [
-                    'shopgate_payment_name'   => 'Credit card (Braintree)',
-                    'status'                  => 'authorized',
-                    'transaction_id'          => '7mwm7q4a',
-                    'transaction_type'        => 'sale',
-                    'processor_auth_code'     => '02880Q',
-                    'processor_response_code' => '1000',
-                    'processor_response_text' => 'Approved',
-                    'risk_data'               => [],
-                    'credit_card'             => [
-                        'holder'        => 'Testi Test',
-                        'masked_number' => '************9596',
-                        'type'          => 'mastercard',
-                        'expiry_year'   => 2021,
-                        'expiry_month'  => 2,
-                    ]
-                ],
+                CreditCard::getAdditionalPayment(),
                 'BRAINTR_CC',
                 'CC'
             ],
