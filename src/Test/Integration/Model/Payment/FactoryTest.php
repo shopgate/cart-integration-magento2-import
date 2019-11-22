@@ -55,7 +55,7 @@ class FactoryTest extends TestCase
      *
      * @throws LocalizedException
      *
-     * @magentoConfigFixture default/payment/braintree/active 1
+     * @magentoConfigFixture current_store payment/braintree/active 1
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
