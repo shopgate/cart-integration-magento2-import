@@ -58,7 +58,7 @@ abstract class AbstractPayment
     protected const PAYMENT_CODE = '';
 
     /** @var CoreInterface */
-    private $scopeConfig;
+    protected $scopeConfig;
     /** @var Manager */
     private $moduleManager;
     /** @var PaymentHelper */
@@ -131,12 +131,22 @@ abstract class AbstractPayment
     }
 
     /**
-     * Allows manipulation of order data
+     * Allows manipulation of order data BEFORE the has been saved
      *
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
      */
-    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
+    public function manipulateOrderWithPaymentDataBeforeSave(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
+    {
+    }
+
+    /**
+     * Allows manipulation of order data After the has been saved
+     *
+     * @param MagentoOrder  $magentoOrder
+     * @param ShopgateOrder $shopgateOrder
+     */
+    public function manipulateOrderWithPaymentDataAfterSave(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
     }
 

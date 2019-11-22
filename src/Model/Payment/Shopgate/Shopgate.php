@@ -47,8 +47,10 @@ class Shopgate extends AbstractPayment
     /**
      * @inheritDoc
      */
-    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
+    public function manipulateOrderWithPaymentDataBeforeSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
         if ($shopgateOrder->getIsPaid()
             && $magentoOrder->getBaseTotalDue()
             && $magentoOrder->getPayment()

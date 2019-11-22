@@ -28,6 +28,7 @@ use Exception;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
+use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Vault\Api\Data\PaymentTokenFactoryInterface;
@@ -39,11 +40,11 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class CreditCard extends AbstractPayment
 {
-    protected const  MODULE_NAME          = 'Magento_Braintree';
-    protected const  PAYMENT_CODE         = 'braintree';
-    protected const  XML_CONFIG_ENABLED   = 'payment/braintree/active';
-    private const    STATUS_AUTHORIZED    = 'authorized';
-    private const    CREDIT_CARD_TYPE_MAP = [
+    protected const  MODULE_NAME               = 'Magento_Braintree';
+    protected const  PAYMENT_CODE              = 'braintree';
+    protected const  XML_CONFIG_ENABLED        = 'payment/braintree/active';
+    private const    XML_CONFIG_PAYMENT_ACTION = 'payment/braintree/payment_action';
+    private const    CREDIT_CARD_TYPE_MAP      = [
         'visa'       => 'VI',
         'maestro'    => 'MI',
         'mastercard' => 'MC',
@@ -92,34 +93,15 @@ class CreditCard extends AbstractPayment
 
     /**
      * @inheritDoc
-     *
-     * @throws Exception
      */
-    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
-        $paymentInformation  = $shopgateOrder->getPaymentInfos();
-        $usedCreditCard      = $paymentInformation['credit_card'];
-        $paymentToken        = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
-        $paymentTokenDetails = [
-            'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
-            'maskedCC'       => $this->helper->getLastCCNumbers($paymentInformation['credit_card']['masked_number']),
-            'expirationData' => $this->helper->formatExpirationDate(
-                $paymentInformation['credit_card']['expiry_month'],
-                $paymentInformation['credit_card']['expiry_year']
-            )
-        ];
-        $paymentToken->setGatewayToken($paymentInformation['processor_auth_code'])
-                     ->setExpiresAt(
-                         $this->helper->calculateExpirationDate(
-                             $usedCreditCard['expiry_year'],
-                             $usedCreditCard['expiry_month']
-                         )
-                     )->setTokenDetails($this->serializer->serialize($paymentTokenDetails));
+    public function manipulateOrderWithPaymentDataBeforeSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
+        $paymentInformation = $shopgateOrder->getPaymentInfos();
+        $usedCreditCard     = $paymentInformation['credit_card'];
+        $payment            = $magentoOrder->getPayment();
 
-        $payment = $magentoOrder->getPayment();
-        if (!$payment) {
-            throw new Exception('No payment?'); //todo-sg: hard error or just return or if this is possible?
-        }
         $orderPayment = $this->orderPaymentRepository->get($payment->getEntityId());
         $this->orderPaymentRepository->delete($orderPayment);
         $payment->setData(
@@ -140,6 +122,24 @@ class CreditCard extends AbstractPayment
 
         $extensionAttributes = $payment->getExtensionAttributes();
         if ($extensionAttributes) {
+            $paymentToken        =
+                $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
+            $paymentTokenDetails = [
+                'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
+                'maskedCC'       => $this->helper->getLastCCNumbers($paymentInformation['credit_card']['masked_number']),
+                'expirationData' => $this->helper->formatExpirationDate(
+                    $paymentInformation['credit_card']['expiry_month'],
+                    $paymentInformation['credit_card']['expiry_year']
+                )
+            ];
+            $paymentToken->setGatewayToken($paymentInformation['processor_auth_code'])
+                         ->setExpiresAt(
+                             $this->helper->calculateExpirationDate(
+                                 $usedCreditCard['expiry_year'],
+                                 $usedCreditCard['expiry_month']
+                             )
+                         )->setTokenDetails($this->serializer->serialize($paymentTokenDetails));
+
             $extensionAttributes->setVaultPaymentToken($paymentToken);
             $payment->setExtensionAttributes($extensionAttributes);
         }
@@ -151,13 +151,6 @@ class CreditCard extends AbstractPayment
         $payment->setIsTransactionClosed(0);
         $payment->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
         $payment->save();
-        if ($shopgateOrder->getIsPaid()) {
-            /* todo-sg: check if we always need the real capture or just the registerCaptureNotification
-             * (in case braintree payment has already been authorized and captured at Shopgate to avoid re-capturing)
-             */
-            // $payment->capture();
-            // $magentoOrder->getPayment()->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
-        }
     }
 
     /**
@@ -189,14 +182,6 @@ class CreditCard extends AbstractPayment
     }
 
     /**
-     * @inheritDoc
-     */
-    public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
-        // todo-sg: checkout how status will be set as there is no configuration for it
-    }
-
-    /**
      * @param string $ccType
      *
      * @return string
@@ -204,5 +189,30 @@ class CreditCard extends AbstractPayment
     private function getMappedCCType(string $ccType): string
     {
         return static::CREDIT_CARD_TYPE_MAP[$ccType];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function manipulateOrderWithPaymentDataAfterSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
+        $payment = $magentoOrder->getPayment();
+        if ($shopgateOrder->getIsPaid()) {
+            // presumably shopgate captured, so we should not
+            $payment->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
+        } elseif ($this->scopeConfig->getConfigByPath(self::XML_CONFIG_PAYMENT_ACTION)->getValue()
+                  === MethodInterface::ACTION_AUTHORIZE_CAPTURE) {
+            $payment->capture();
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
+    {
+        // todo-sg: checkout how status will be set as there is no configuration for it
     }
 }

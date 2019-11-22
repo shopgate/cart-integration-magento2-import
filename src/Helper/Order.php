@@ -237,16 +237,11 @@ class Order
     protected function setOrderPayment()
     {
         $payment = $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod());
-        $payment->manipulateOrderWithPaymentData($this->mageOrder, $this->sgOrder);
+        $payment->manipulateOrderWithPaymentDataBeforeSave($this->mageOrder, $this->sgOrder);
 
-        //todo-sg: Ideally moved to afterOrder part into the payment model
-        $this->orderRepository->save($this->mageOrder);
-        $payment = $this->mageOrder->getPayment();
-        if ($this->sgOrder->getIsPaid()) { // presumably shopgate captured, so we should not
-            $payment->registerCaptureNotification($this->sgOrder->getAmountComplete(), true); //todo-sg: fraud check?
-        } elseif (false) { //todo-sg: check mage config is auth & capture. Shopgate -> auth only Mage -> auth & capture
-            $payment->capture();
-        }
+        $this->mageOrder = $this->orderRepository->save($this->mageOrder);
+
+        $payment->manipulateOrderWithPaymentDataAfterSave($this->mageOrder, $this->sgOrder);
     }
 
     /**
