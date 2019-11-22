@@ -200,12 +200,22 @@ class CreditCard extends AbstractPayment
     ): void {
         $payment = $magentoOrder->getPayment();
         if ($shopgateOrder->getIsPaid()) {
-            // presumably shopgate captured, so we should not
+            // presumably Shopgate captured, so we should not
             $payment->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
-        } elseif ($this->scopeConfig->getConfigByPath(self::XML_CONFIG_PAYMENT_ACTION)->getValue()
-                  === MethodInterface::ACTION_AUTHORIZE_CAPTURE) {
+        } elseif ($this->shouldCaptureOnline()) {
             $payment->capture();
         }
+    }
+
+    /**
+     * Checks of Braintree CC is configured to authorize and capture
+     *
+     * @return bool
+     */
+    private function shouldCaptureOnline(): bool
+    {
+        $configuredPaymentAction = $this->scopeConfig->getConfigByPath(self::XML_CONFIG_PAYMENT_ACTION)->getValue();
+        return  $configuredPaymentAction === MethodInterface::ACTION_AUTHORIZE_CAPTURE;
     }
 
     /**
@@ -213,6 +223,5 @@ class CreditCard extends AbstractPayment
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        // todo-sg: checkout how status will be set as there is no configuration for it
     }
 }
