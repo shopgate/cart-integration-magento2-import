@@ -238,10 +238,15 @@ class Order
     {
         $payment = $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod());
         $payment->manipulateOrderWithPaymentData($this->mageOrder, $this->sgOrder);
-        //todo-sg: test code, this saves transaction it seems?
-        $this->orderRepository->save($this->mageOrder); // saves payment
-        $order = $this->orderRepository->get($this->mageOrder->getId()); //todo-sg: not sure needed
-        $order->getPayment()->capture();
+
+        //todo-sg: Ideally moved to afterOrder part into the payment model
+        $this->orderRepository->save($this->mageOrder);
+        $payment = $this->mageOrder->getPayment();
+        if ($this->sgOrder->getIsPaid()) { // presumably shopgate captured, so we should not
+            $payment->registerCaptureNotification($this->sgOrder->getAmountComplete(), true); //todo-sg: fraud check?
+        } elseif (false) { //todo-sg: check mage config is auth & capture. Shopgate -> auth only Mage -> auth & capture
+            $payment->capture();
+        }
     }
 
     /**
