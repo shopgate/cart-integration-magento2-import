@@ -223,6 +223,8 @@ class CreditCard extends AbstractPayment
     }
 
     /**
+     * Will be handled automatically, therefor empty
+     *
      * @inheritDoc
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
