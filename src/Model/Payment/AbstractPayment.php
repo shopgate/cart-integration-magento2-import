@@ -131,7 +131,7 @@ abstract class AbstractPayment
     }
 
     /**
-     * Allows manipulation of order data BEFORE the has been saved
+     * Allows manipulation of order data BEFORE it is saved
      *
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
@@ -141,7 +141,7 @@ abstract class AbstractPayment
     }
 
     /**
-     * Allows manipulation of order data After the has been saved
+     * Allows manipulation of order data After it is saved
      *
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
@@ -181,7 +181,7 @@ abstract class AbstractPayment
     /**
      * @param ShopgateOrder $shopgateOrder
      *
-     * @return array
+     * @return ShopgateOrder[]
      */
     public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
     {
