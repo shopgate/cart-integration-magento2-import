@@ -22,6 +22,7 @@
 
 namespace Shopgate\Import\Test\Integration\Model\Payment;
 
+use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
@@ -160,12 +161,14 @@ class CreditCardTest extends TestCase
      * @param int $isPaid
      *
      * @return ShopgateOrder
+     *
+     * @throws Exception
      */
     private function getShopgateOrder(int $isPaid = 0): ShopgateOrder
     {
         return new ShopgateOrder(
             [
-                'order_number'               => rand(1000000000, 9999999999),
+                'order_number'               => random_int(1000000000, 9999999999),
                 'is_paid'                    => $isPaid,
                 'payment_time'               => null,
                 'payment_transaction_number' => (string) rand(1000000000, 9999999999),

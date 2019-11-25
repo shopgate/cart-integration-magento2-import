@@ -49,10 +49,11 @@ class Factory
         $methodToLoad  = isset($this->paymentMapping[$paymentMethod])
             ? $paymentMethod
             : self::DEFAULT_PAYMENT_METHOD;
-        $paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create();
+        /** @var AbstractPayment $paymentMethodInstance */
+        $paymentMethodInstance = $this->paymentMapping[strtoupper($methodToLoad)]->create();
 
-        return $paymentMethod->isValid()
-            ? $paymentMethod
+        return $paymentMethodInstance->isValid()
+            ? $paymentMethodInstance
             : $this->paymentMapping[self::DEFAULT_PAYMENT_METHOD]->create();
     }
 }

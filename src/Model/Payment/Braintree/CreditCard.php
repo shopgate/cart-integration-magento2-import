@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Shopgate\Import\Model\Payment\Braintree;
 
 use Exception;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
@@ -93,6 +94,9 @@ class CreditCard extends AbstractPayment
 
     /**
      * @inheritDoc
+     *
+     * @throws LocalizedException
+     * @throws Exception
      */
     public function manipulateOrderWithPaymentDataBeforeSave(
         MagentoOrder $magentoOrder,
@@ -125,11 +129,11 @@ class CreditCard extends AbstractPayment
             $paymentToken        =
                 $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
             $paymentTokenDetails = [
-                'type'           => $this->getMappedCCType($paymentInformation['credit_card']['type']),
-                'maskedCC'       => $this->helper->getLastCCNumbers($paymentInformation['credit_card']['masked_number']),
+                'type'           => $this->getMappedCCType($usedCreditCard['type']),
+                'maskedCC'       => $this->helper->getLastCCNumbers($usedCreditCard['masked_number']),
                 'expirationData' => $this->helper->formatExpirationDate(
-                    $paymentInformation['credit_card']['expiry_month'],
-                    $paymentInformation['credit_card']['expiry_year']
+                    $usedCreditCard['expiry_month'],
+                    $usedCreditCard['expiry_year']
                 )
             ];
             $paymentToken->setGatewayToken($paymentInformation['processor_auth_code'])
@@ -215,7 +219,8 @@ class CreditCard extends AbstractPayment
     private function shouldCaptureOnline(): bool
     {
         $configuredPaymentAction = $this->scopeConfig->getConfigByPath(self::XML_CONFIG_PAYMENT_ACTION)->getValue();
-        return  $configuredPaymentAction === MethodInterface::ACTION_AUTHORIZE_CAPTURE;
+
+        return $configuredPaymentAction === MethodInterface::ACTION_AUTHORIZE_CAPTURE;
     }
 
     /**
