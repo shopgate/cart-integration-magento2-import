@@ -56,6 +56,7 @@ class ImportOrderTest extends TestCase
         $this->importClass     = $objectManager->create('Shopgate\Import\Model\Service\Import');
         $this->orderClass      = $objectManager->create('Shopgate\Import\Helper\Order');
         $this->orderRepository = $objectManager->create('Magento\Sales\Api\OrderRepositoryInterface');
+        $this->dataManager     = $objectManager->create(SgDataManager::class);
     }
 
     /**
@@ -99,8 +100,6 @@ class ImportOrderTest extends TestCase
         string $paymentMethod,
         string $paymentGroup
     ): void {
-        $dataManager = new SgDataManager();
-
         $shopgateOrder = new \ShopgateOrder(
             [
                 'order_number'               => rand(1000000000, 9999999999),
@@ -111,11 +110,11 @@ class ImportOrderTest extends TestCase
                 'amount_shop_payment'        => '5.00',
                 'amount_complete'            => '149.85',
                 'shipping_infos'             => ['amount' => '4.90'],
-                'invoice_address'            => $dataManager->getGermanAddress(),
-                'delivery_address'           => $dataManager->getGermanAddress(false),
+                'invoice_address'            => $this->dataManager->getGermanAddress(),
+                'delivery_address'           => $this->dataManager->getGermanAddress(false),
                 'external_coupons'           => [],
                 'shopgate_coupons'           => [],
-                'items'                      => [$dataManager->getSimpleProduct()],
+                'items'                      => [$this->dataManager->getSimpleProduct()],
                 'payment_infos'              => $paymentInformation,
                 'payment_method'             => $paymentMethod,
                 'payment_group'              => $paymentGroup
@@ -160,8 +159,6 @@ class ImportOrderTest extends TestCase
      */
     public function simpleOrderProvider(): array
     {
-        $dataManager = new SgDataManager();
-
         return [
             'simple order' => [
                 new \ShopgateOrder(
@@ -174,14 +171,14 @@ class ImportOrderTest extends TestCase
                         'shipping_infos'      => [
                             'amount' => '4.90',
                         ],
-                        'invoice_address'     => $dataManager->getGermanAddress(),
-                        'delivery_address'    => $dataManager->getGermanAddress(false),
+                        'invoice_address'     => $this->dataManager->getGermanAddress(),
+                        'delivery_address'    => $this->dataManager->getGermanAddress(false),
                         'external_coupons'    => [],
                         'shopgate_coupons'    => [],
                         'items'               => [
-                            $dataManager->getSimpleProduct(),
-                            $dataManager->getConfigurableProduct(),
-                            $dataManager->getGroupedProduct()
+                            $this->dataManager->getSimpleProduct(),
+                            $this->dataManager->getConfigurableProduct(),
+                            $this->dataManager->getGroupedProduct()
                         ]
                     ]
                 )
