@@ -20,7 +20,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
-namespace Shopgate\Import\Test\Integration\Model\Payment;
+namespace Shopgate\Import\Test\Integration\Model\Payment\Braintree;
 
 use Exception;
 use Magento\Framework\Exception\InputException;
