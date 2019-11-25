@@ -102,7 +102,7 @@ class ImportOrderTest extends TestCase
     ): void {
         $shopgateOrder = new \ShopgateOrder(
             [
-                'order_number'               => rand(1000000000, 9999999999),
+                'order_number'               => random_int(1000000000, 9999999999),
                 'is_paid'                    => 1,
                 'payment_time'               => null,
                 'payment_transaction_number' => '8654415',

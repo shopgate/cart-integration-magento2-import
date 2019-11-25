@@ -171,7 +171,7 @@ class CreditCardTest extends TestCase
                 'order_number'               => random_int(1000000000, 9999999999),
                 'is_paid'                    => $isPaid,
                 'payment_time'               => null,
-                'payment_transaction_number' => (string) rand(1000000000, 9999999999),
+                'payment_transaction_number' => (string) random_int(1000000000, 9999999999),
                 'mail'                       => 'shopgate@shopgate.com',
                 'amount_shop_payment'        => '5.00',
                 'amount_complete'            => '149.85',
