@@ -154,7 +154,6 @@ class CreditCard extends AbstractPayment
         $payment->setShouldCloseParentTransaction(false);
         $payment->setIsTransactionClosed(0);
         $payment->registerAuthorizationNotification($shopgateOrder->getAmountComplete());
-        $payment->save();
     }
 
     /**

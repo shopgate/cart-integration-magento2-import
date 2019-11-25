@@ -65,7 +65,7 @@ class CreditCardTest extends TestCase
         $this->importClass           = $this->objectManager->create(Import::class);
         $this->orderRepository       = $this->objectManager->create(OrderRepository::class);
         $this->transactionRepository = $this->objectManager->create(TransactionRepository::class);
-        $this->dataManager           = new SgDataManager();
+        $this->dataManager           = $this->objectManager->create(SgDataManager::class);
     }
 
     /**
