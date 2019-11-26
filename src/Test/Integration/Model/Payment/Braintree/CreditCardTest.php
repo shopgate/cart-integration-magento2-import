@@ -20,7 +20,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
-namespace Shopgate\Import\Test\Integration\Model\Payment;
+namespace Shopgate\Import\Test\Integration\Model\Payment\Braintree;
 
 use Exception;
 use Magento\Framework\Exception\InputException;
@@ -72,6 +72,7 @@ class CreditCardTest extends TestCase
      * @magentoConfigFixture current_store payment/braintree/active 1
      * @magentoConfigFixture current_store payment/braintree/payment_action authorize
      *
+     * @throws Exception
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
@@ -103,6 +104,7 @@ class CreditCardTest extends TestCase
      * @magentoConfigFixture current_store payment/braintree/active 1
      * @magentoConfigFixture current_store payment/braintree/payment_action authorize
      *
+     * @throws Exception
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
@@ -132,6 +134,7 @@ class CreditCardTest extends TestCase
      * @magentoConfigFixture current_store payment/braintree/active 1
      * @magentoConfigFixture current_store payment/braintree/payment_action capture
      *
+     * @throws Exception
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
