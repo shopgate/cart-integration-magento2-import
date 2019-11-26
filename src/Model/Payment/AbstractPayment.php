@@ -41,13 +41,9 @@ abstract class AbstractPayment
      */
     protected const XML_CONFIG_ENABLED = '';
     /**
-     * The config path to module's paid status
+     * The config path to module's order status
      */
-    protected const XML_CONFIG_STATUS_PAID = '';
-    /**
-     * The config path to module's not paid status
-     */
-    protected const XML_CONFIG_STATUS_NOT_PAID = '';
+    protected const XML_CONFIG_ORDER_STATUS = 'processing';
     /**
      * The name of the module, as defined in etc/module.xml
      */
@@ -136,8 +132,10 @@ abstract class AbstractPayment
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
      */
-    public function manipulateOrderWithPaymentDataBeforeSave(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
+    public function manipulateOrderWithPaymentDataBeforeSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
     }
 
     /**
@@ -146,8 +144,10 @@ abstract class AbstractPayment
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
      */
-    public function manipulateOrderWithPaymentDataAfterSave(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
+    public function manipulateOrderWithPaymentDataAfterSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
     }
 
     /**
@@ -160,22 +160,16 @@ abstract class AbstractPayment
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatusConfig = $shopgateOrder->getIsPaid()
-            ? static::XML_CONFIG_STATUS_PAID
-            : static::XML_CONFIG_STATUS_NOT_PAID;
-        $orderStatus       = $this->scopeConfig->getConfigByPath($orderStatusConfig)->getValue();
-
-        if ($orderStatus) {
-            $orderState = $this->utility->getStateForStatus($orderStatus);
-            if ($orderState === MagentoOrder::STATE_HOLDED) {
-                if ($magentoOrder->canHold()) {
-                    $magentoOrder->hold();
-                }
-
-                return;
+        $orderStatus = $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ORDER_STATUS)->getValue();
+        $orderState  = $this->utility->getStateForStatus($orderStatus);
+        if ($orderState === MagentoOrder::STATE_HOLDED) {
+            if ($magentoOrder->canHold()) {
+                $magentoOrder->hold();
             }
-            $magentoOrder->setState($orderState)->setStatus($orderStatus);
+
+            return;
         }
+        $magentoOrder->setState($orderState)->setStatus($orderStatus);
     }
 
     /**
