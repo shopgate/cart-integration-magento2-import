@@ -37,6 +37,7 @@
         <arguments>
             <argument name="paymentMapping" xsi:type="array">
                 <item name="SHOPGATE" xsi:type="object">Shopgate\Import\Model\Payment\Shopgate\ShopgateFactory</item>
+                <item name="BRAINTR_CC" xsi:type="object">Shopgate\Import\Model\Payment\Braintree\CreditCardFactory</item>
             </argument>
         </arguments>
     </type>

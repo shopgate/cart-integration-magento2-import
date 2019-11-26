@@ -20,33 +20,51 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Service;
 
-use Shopgate\Base\Tests\Bootstrap;
+use Exception;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Registry;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order as MageOrder;
+use PHPUnit\Framework\TestCase;
+use Magento\TestFramework\Helper\Bootstrap;
 use Shopgate\Base\Tests\Integration\SgDataManager;
+use Shopgate\Import\Helper\Order as ShopgateOrder;
+use Shopgate\Import\Model\Service\Import;
+use Shopgate\Import\Test\Integration\Data\Payment\Braintree\CreditCard;
+use ShopgateLibraryException;
 
 /**
- * @coversDefaultClass Shopgate\Import\Model\Service\Import
+ * @coversDefaultClass Import
+ *
+ * @magentoAppIsolation enabled
+ * @magentoDbIsolation  enabled
+ * @magentoAppArea      frontend
  */
-class ImportOrderTest extends \PHPUnit\Framework\TestCase
+class ImportOrderTest extends TestCase
 {
-    /** @var \Shopgate\Import\Helper\Order */
-    protected $orderClass;
-    /** @var \Shopgate\Import\Model\Service\Import */
-    protected $importClass;
+    /** @var ShopgateOrder */
+    private $orderClass;
+    /** @var Import */
+    private $importClass;
     /** @var array - list of created orders to clean up */
-    protected $orderHolder = [];
-    /** @var \Magento\Sales\Api\OrderRepositoryInterface */
-    protected $orderRepository;
+    private $orderHolder = [];
+    /** @var OrderRepositoryInterface */
+    private $orderRepository;
     /** @var SgDataManager */
-    protected $dataManager;
+    private $dataManager;
 
-    public function setUp()
+    public function setUp(): void
     {
         $objectManager         = Bootstrap::getObjectManager();
-        $this->importClass     = $objectManager->create('Shopgate\Import\Model\Service\Import');
-        $this->orderClass      = $objectManager->create('Shopgate\Import\Helper\Order');
-        $this->orderRepository = $objectManager->create('Magento\Sales\Api\OrderRepositoryInterface');
+        $this->importClass     = $objectManager->create(Import::class);
+        $this->orderClass      = $objectManager->create(ShopgateOrder::class);
+        $this->orderRepository = $objectManager->create(OrderRepositoryInterface::class);
+        $this->dataManager     = $objectManager->create(SgDataManager::class);
     }
 
     /**
@@ -57,14 +75,14 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
      * @param \ShopgateOrder $order
      *
      * @dataProvider simpleOrderProvider
-     * @throws \ShopgateLibraryException
+     * @throws ShopgateLibraryException
      */
-    public function testOrderImport(\ShopgateOrder $order)
+    public function testOrderImport(\ShopgateOrder $order): void
     {
         $result = $this->importClass->addOrder($order);
-        /** @var \Shopgate\Import\Helper\Order $sgOrder */
-        $sgOrder = Bootstrap::getObjectManager()->get('Shopgate\Import\Helper\Order');
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var ShopgateOrder $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get(ShopgateOrder::class);
+        /** @var MageOrder $order */
         $order = $sgOrder->loadMethods([]);
 
         $this->assertNotEmpty($result);
@@ -73,17 +91,90 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param string $expectedPaymentCode
+     * @param array  $paymentInformation
+     * @param string $paymentMethod
+     * @param string $paymentGroup
+     *
+     * @throws Exception
+     * @throws ShopgateLibraryException
+     * @throws Exception
+     *
+     * @dataProvider         paymentDataProvider
+     * @magentoConfigFixture default/payment/shopgate/order_status processing
+     * @magentoConfigFixture current_store payment/braintree/active 1
+     */
+    public function testPaymentMapping(
+        string $expectedPaymentCode,
+        array $paymentInformation,
+        string $paymentMethod,
+        string $paymentGroup
+    ): void {
+        $shopgateOrder = new \ShopgateOrder(
+            [
+                'order_number'               => random_int(1000000000, 9999999999),
+                'is_paid'                    => 1,
+                'payment_time'               => null,
+                'payment_transaction_number' => '8654415',
+                'mail'                       => 'shopgate@shopgate.com',
+                'amount_shop_payment'        => '5.00',
+                'amount_complete'            => '149.85',
+                'shipping_infos'             => ['amount' => '4.90'],
+                'invoice_address'            => $this->dataManager->getGermanAddress(),
+                'delivery_address'           => $this->dataManager->getGermanAddress(false),
+                'external_coupons'           => [],
+                'shopgate_coupons'           => [],
+                'items'                      => [$this->dataManager->getSimpleProduct()],
+                'payment_infos'              => $paymentInformation,
+                'payment_method'             => $paymentMethod,
+                'payment_group'              => $paymentGroup
+            ]
+        );
+
+        $this->orderHolder[] = $this->importClass->addOrder($shopgateOrder);
+        /** @var ShopgateOrder $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get(ShopgateOrder::class);
+        /** @var MageOrder $order */
+        $order = $sgOrder->loadMethods([]);
+
+        $this->assertEquals($expectedPaymentCode, $order->getPayment()->getMethod());
+    }
+
+    /**
      * @return array
      */
-    public function simpleOrderProvider()
+    public function paymentDataProvider(): array
     {
-        $dataManager = new SgDataManager();
+        return [
+            'Braintree Credit Card'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment(),
+                'BRAINTR_CC',
+                'CC'
+            ],
+            'Not mapped payment method' => [
+                'shopgate',
+                [
+                    'shopgate_payment_name' => 'Unknown',
+                    'status'                => 'authorized'
+                ],
+                'SOMETHING_UNKNOWN',
+                'NEW'
+            ]
+        ];
+    }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function simpleOrderProvider(): array
+    {
         return [
             'simple order' => [
                 new \ShopgateOrder(
                     [
-                        'order_number'        => rand(1000000000, 9999999999),
+                        'order_number'        => random_int(1000000000, 9999999999),
                         'is_paid'             => 0,
                         'mail'                => 'shopgate@shopgate.com',
                         'amount_shop_payment' => '5.00',
@@ -91,14 +182,14 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
                         'shipping_infos'      => [
                             'amount' => '4.90',
                         ],
-                        'invoice_address'     => $dataManager->getGermanAddress(),
-                        'delivery_address'    => $dataManager->getGermanAddress(false),
+                        'invoice_address'     => $this->dataManager->getGermanAddress(),
+                        'delivery_address'    => $this->dataManager->getGermanAddress(false),
                         'external_coupons'    => [],
                         'shopgate_coupons'    => [],
                         'items'               => [
-                            $dataManager->getSimpleProduct(),
-                            $dataManager->getConfigurableProduct(),
-                            $dataManager->getGroupedProduct()
+                            $this->dataManager->getSimpleProduct(),
+                            $this->dataManager->getConfigurableProduct(),
+                            $this->dataManager->getGroupedProduct()
                         ]
                     ]
                 )
@@ -108,14 +199,16 @@ class ImportOrderTest extends \PHPUnit\Framework\TestCase
 
     /**
      * Delete all created orders & quotes
+     *
+     * @throws NoSuchEntityException
      */
-    public function tearDown()
+    public function tearDown(): void
     {
-        /** @var \Magento\Framework\Registry $registry */
-        $registry = Bootstrap::getObjectManager()->get('\Magento\Framework\Registry');
+        /** @var Registry $registry */
+        $registry = Bootstrap::getObjectManager()->get(Registry::class);
         $registry->register('isSecureArea', true, true);
-        /** @var \Magento\Quote\Model\QuoteRepository $quoteRepo */
-        $quoteRepo = Bootstrap::getObjectManager()->create('Magento\Quote\Model\QuoteRepository');
+        /** @var QuoteRepository $quoteRepo */
+        $quoteRepo = Bootstrap::getObjectManager()->create(QuoteRepository::class);
 
         foreach ($this->orderHolder as $order) {
             if (isset($order['external_order_id'])) {

@@ -24,16 +24,12 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Model\Payment;
 
-use Shopgate\Import\Model\Payment\AbstractPayment;
-
 class Factory
 {
     const DEFAULT_PAYMENT_METHOD = 'SHOPGATE';
 
     /** @var array */
     private $paymentMapping;
-    /** @var AbstractPayment */
-    private $paymentMethod;
 
     /**
      * @param array $paymentMapping - methods loaded via di.xml
@@ -50,15 +46,12 @@ class Factory
      */
     public function getPayment(string $paymentMethod): AbstractPayment
     {
-        if (!$this->paymentMethod) {
-            $methodToLoad        = $this->paymentMapping[$paymentMethod] ?? self::DEFAULT_PAYMENT_METHOD;
-            $this->paymentMethod = $this->paymentMapping[strtoupper($methodToLoad)]->create();
-        }
+        /** @var AbstractPayment $paymentMethodInstance */
+        $paymentMethodInstance = ($this->paymentMapping[strtoupper($paymentMethod)]
+                                  ?? $this->paymentMapping[self::DEFAULT_PAYMENT_METHOD])->create();
 
-        if (!$this->paymentMethod->isValid()) {
-            $this->paymentMethod = $this->paymentMapping[self::DEFAULT_PAYMENT_METHOD]->create();
-        }
-
-        return $this->paymentMethod;
+        return $paymentMethodInstance->isValid()
+            ? $paymentMethodInstance
+            : $this->paymentMapping[self::DEFAULT_PAYMENT_METHOD]->create();
     }
 }

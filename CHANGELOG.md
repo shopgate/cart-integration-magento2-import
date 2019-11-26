@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Changed
 - Payment mapping is now based on factories
+### Added
+- Mapping for Braintree CreditCard payment method
 
 ### Removed
 - Support for PHP < 7.1

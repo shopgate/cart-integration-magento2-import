@@ -24,41 +24,37 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Model\Payment;
 
-use Shopgate\Base\Api\Config\CoreInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\Manager;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Magento\Store\Model\ScopeInterface;
+use Shopgate\Base\Api\Config\CoreInterface;
+use Shopgate\Base\Model\Payment\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
-use Magento\Framework\Exception\LocalizedException;
 
 abstract class AbstractPayment
 {
     /**
      * The config path to module enabled
      */
-    const XML_CONFIG_ENABLED = '';
+    protected const XML_CONFIG_ENABLED = '';
     /**
-     * The config path to module's paid status
+     * The config path to module's order status
      */
-    const XML_CONFIG_STATUS_PAID = '';
-    /**
-     * The config path to module's not paid status
-     */
-    const XML_CONFIG_STATUS_NOT_PAID = '';
+    protected const XML_CONFIG_ORDER_STATUS = 'processing';
     /**
      * The name of the module, as defined in etc/module.xml
      */
-    const MODULE_NAME = '';
+    protected const MODULE_NAME = '';
     /**
      * The code of the magento payment method
      */
-    const PAYMENT_CODE = '';
+    protected const PAYMENT_CODE = '';
 
     /** @var CoreInterface */
-    private $scopeConfig;
+    protected $scopeConfig;
     /** @var Manager */
     private $moduleManager;
     /** @var PaymentHelper */
@@ -68,9 +64,9 @@ abstract class AbstractPayment
 
     /**
      * @param CoreInterface $scopeConfig
-     * @param Manager              $moduleManager
-     * @param PaymentHelper        $paymentHelper
-     * @param Utility              $utility
+     * @param Manager       $moduleManager
+     * @param PaymentHelper $paymentHelper
+     * @param Utility       $utility
      */
     public function __construct(
         CoreInterface $scopeConfig,
@@ -131,13 +127,27 @@ abstract class AbstractPayment
     }
 
     /**
-     * Allows manipulation of order data
+     * Allows manipulation of order data BEFORE it is saved
      *
      * @param MagentoOrder  $magentoOrder
      * @param ShopgateOrder $shopgateOrder
      */
-    public function manipulateOrderWithPaymentData(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
+    public function manipulateOrderWithPaymentDataBeforeSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
+    }
+
+    /**
+     * Allows manipulation of order data After it is saved
+     *
+     * @param MagentoOrder  $magentoOrder
+     * @param ShopgateOrder $shopgateOrder
+     */
+    public function manipulateOrderWithPaymentDataAfterSave(
+        MagentoOrder $magentoOrder,
+        ShopgateOrder $shopgateOrder
+    ): void {
     }
 
     /**
@@ -150,21 +160,27 @@ abstract class AbstractPayment
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatusConfig = $shopgateOrder->getIsPaid()
-            ? static::XML_CONFIG_STATUS_PAID
-            : static::XML_CONFIG_STATUS_NOT_PAID;
-        $orderStatus = $this->scopeConfig->getConfigByPath($orderStatusConfig)->getValue();
-
-        if ($orderStatus) {
-            $orderState  = $this->utility->getStateForStatus($orderStatus);
-            if ($orderState === MagentoOrder::STATE_HOLDED) {
-                if ($magentoOrder->canHold()) {
-                    $magentoOrder->hold();
-                }
-
-                return;
+        $orderStatus = $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ORDER_STATUS)->getValue();
+        $orderState  = $this->utility->getStateForStatus($orderStatus);
+        if ($orderState === MagentoOrder::STATE_HOLDED) {
+            if ($magentoOrder->canHold()) {
+                $magentoOrder->hold();
             }
-            $magentoOrder->setState($orderState)->setStatus($orderStatus);
+
+            return;
         }
+        $magentoOrder->setState($orderState)->setStatus($orderStatus);
+    }
+
+    /**
+     * @param ShopgateOrder $shopgateOrder
+     *
+     * @return ShopgateOrder[]
+     */
+    public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
+    {
+        return [
+            Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder
+        ];
     }
 }
