@@ -24,6 +24,12 @@ namespace Shopgate\Import\Helper;
 
 use Magento\Framework\Api\SimpleDataObjectConverter;
 use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\MailException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Quote\Model\QuoteRepository;
@@ -36,16 +42,18 @@ use Shopgate\Base\Model\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base;
 use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Helper\Order\Shipping;
-use Shopgate\Import\Helper\Order\Utility;
+use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
 use Shopgate\Import\Model\Service\Import as ImportService;
+use ShopgateLibraryException;
 
 class Order
 {
-
-    /** @var Utility */
-    private $utility;
     /** @var Base */
     protected $sgOrder;
+    /** @var MageOrder */
+    protected $mageOrder;
+    /** @var ManagerInterface */
+    protected $eventManager;
     /** @var SgLoggerInterface */
     private $log;
     /** @var Quote */
@@ -56,8 +64,6 @@ class Order
     private $quoteManagement;
     /** @var OrderRepository */
     private $orderRepository;
-    /** @var MageOrder */
-    protected $mageOrder;
     /** @var OrderRepositoryInterface */
     private $sgOrderRepository;
     /** @var CoreInterface */
@@ -70,11 +76,12 @@ class Order
     private $quoteRepository;
     /** @var Shipping */
     private $shippingHelper;
-    /** @var ManagerInterface */
-    protected $eventManager;
+    /** @var PaymentFactory */
+    private $paymentFactory;
+    /** @var SerializerInterface */
+    private $serializer;
 
     /**
-     * @param Utility                  $utility
      * @param Base                     $order
      * @param SgLoggerInterface        $log
      * @param Quote                    $quote
@@ -88,10 +95,11 @@ class Order
      * @param Shopgate\Order           $localSgOrder
      * @param Shipping                 $shippingHelper
      * @param ManagerInterface         $eventManager
+     * @param PaymentFactory           $paymentFactory
+     * @param SerializerInterface      $serializer
      * @param array                    $quoteMethods
      */
     public function __construct(
-        Utility $utility,
         Base $order,
         SgLoggerInterface $log,
         Quote $quote,
@@ -105,9 +113,10 @@ class Order
         Shopgate\Order $localSgOrder,
         Shipping $shippingHelper,
         ManagerInterface $eventManager,
+        PaymentFactory $paymentFactory,
+        SerializerInterface $serializer,
         array $quoteMethods = []
     ) {
-        $this->utility           = $utility;
         $this->sgOrder           = $order;
         $this->log               = $log;
         $this->quote             = $quote;
@@ -122,6 +131,8 @@ class Order
         $this->localSgOrder      = $localSgOrder;
         $this->shippingHelper    = $shippingHelper;
         $this->eventManager      = $eventManager;
+        $this->paymentFactory    = $paymentFactory;
+        $this->serializer        = $serializer;
     }
 
     /**
@@ -142,13 +153,25 @@ class Order
     }
 
     /**
+     * Executes after order is fully loaded and updated
+     */
+    public function setEndUpdate()
+    {
+        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'))
+                        ->setIsCustomerNotified(false);
+
+        $this->orderRepository->save($this->mageOrder);
+        $this->sgOrderRepository->update($this->localSgOrder);
+    }
+
+    /**
      * Creates the order then we can continue loading on $this->mageOrder
      *
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\InputException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \ShopgateLibraryException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws NoSuchEntityException
+     * @throws ShopgateLibraryException
+     * @throws LocalizedException
      */
     protected function setStartAdd()
     {
@@ -164,7 +187,7 @@ class Order
         $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
         $order = $this->quoteManagement->submit($quote);
         if (null === $order) {
-            throw new \ShopgateLibraryException(\ShopgateLibraryException::PLUGIN_ORDER_ITEM_NOT_FOUND);
+            throw new ShopgateLibraryException(ShopgateLibraryException::PLUGIN_ORDER_ITEM_NOT_FOUND);
         }
         $this->mageOrder = $order;
         $this->eventManager->dispatch('checkout_submit_all_after', ['order' => $this->mageOrder, 'quote' => $quote]);
@@ -181,9 +204,9 @@ class Order
     /**
      * Updates the order
      *
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \ShopgateLibraryException
-     * @throws \Magento\Framework\Exception\InputException
+     * @throws NoSuchEntityException
+     * @throws ShopgateLibraryException
+     * @throws InputException
      */
     protected function setStartUpdate()
     {
@@ -191,22 +214,10 @@ class Order
         $this->log->debug('## Order-Number: ' . $orderNumber);
         $this->localSgOrder = $this->sgOrderRepository->checkOrderExists($orderNumber);
         if (!$this->localSgOrder->getShopgateOrderId()) {
-            throw new \ShopgateLibraryException(\ShopgateLibraryException::PLUGIN_ORDER_NOT_FOUND);
+            throw new ShopgateLibraryException(ShopgateLibraryException::PLUGIN_ORDER_NOT_FOUND);
         }
 
         $this->mageOrder = $this->orderRepository->get($this->localSgOrder->getOrderId());
-    }
-
-    /**
-     * Executes after order is fully loaded and updated
-     */
-    public function setEndUpdate()
-    {
-        $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Order updated by Shopgate.'))
-                        ->setIsCustomerNotified(false);
-
-        $this->orderRepository->save($this->mageOrder);
-        $this->sgOrderRepository->update($this->localSgOrder);
     }
 
     /**
@@ -221,9 +232,22 @@ class Order
     }
 
     /**
+     * Manipulate payments according to payment method
+     */
+    protected function setOrderPayment()
+    {
+        $payment = $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod());
+        $payment->manipulateOrderWithPaymentDataBeforeSave($this->mageOrder, $this->sgOrder);
+
+        $this->mageOrder = $this->orderRepository->save($this->mageOrder);
+
+        $payment->manipulateOrderWithPaymentDataAfterSave($this->mageOrder, $this->sgOrder);
+    }
+
+    /**
      * Checks if shipments should be updated for an existing order
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function setUpdateShipping()
     {
@@ -239,19 +263,13 @@ class Order
 
     /**
      * Set correct order status by payment
+     *
+     * @throws LocalizedException
      */
     protected function setOrderState()
     {
-        $orderStatus = $this->mageOrder->getPayment()->getMethodInstance()->getConfigData('order_status');
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
-        if ($orderState === MageOrder::STATE_HOLDED) {
-            if ($this->mageOrder->canHold()) {
-                $this->mageOrder->hold();
-            }
-
-            return;
-        }
-        $this->mageOrder->setState($orderState)->setStatus($orderStatus);
+        $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod())
+                             ->setOrderStatus($this->mageOrder, $this->sgOrder);
     }
 
     /**
@@ -262,21 +280,6 @@ class Order
         $this->mageOrder->addStatusHistoryComment(
             __('[SHOPGATE] Order added by Shopgate # %1', $this->sgOrder->getOrderNumber())
         )->setIsCustomerNotified(false);
-    }
-
-    /**
-     * Manipulate payments according to payment method
-     *
-     * TODO: once we have factories, move it there
-     */
-    protected function setOrderPayment()
-    {
-        if ($this->sgOrder->getIsPaid() && $this->mageOrder->getBaseTotalDue() && $this->mageOrder->getPayment()) {
-            $this->mageOrder->getPayment()->setShouldCloseParentTransaction(true);
-            $this->mageOrder->getPayment()->registerCaptureNotification($this->sgOrder->getAmountComplete());
-            $this->mageOrder->addStatusHistoryComment(__('[SHOPGATE] Payment received.'))
-                            ->setIsCustomerNotified(false);
-        }
     }
 
     /**
@@ -291,7 +294,7 @@ class Order
     /**
      * Send order notification if activated in config
      *
-     * @throws \Magento\Framework\Exception\MailException
+     * @throws MailException
      */
     protected function setOrderNotification()
     {

@@ -20,7 +20,7 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
-namespace Shopgate\Import\Tests\Integration\Model\Service;
+namespace Shopgate\Import\Test\Integration\Model\Service;
 
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Store\Model\ScopeInterface;
