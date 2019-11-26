@@ -25,15 +25,21 @@ declare(strict_types=1);
 namespace Shopgate\Import\Test\Integration\Model\Service;
 
 use Exception;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Registry;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order as MageOrder;
 use PHPUnit\Framework\TestCase;
 use Magento\TestFramework\Helper\Bootstrap;
 use Shopgate\Base\Tests\Integration\SgDataManager;
-use ShopgateLibraryException;
+use Shopgate\Import\Helper\Order as ShopgateOrder;
+use Shopgate\Import\Model\Service\Import;
 use Shopgate\Import\Test\Integration\Data\Payment\Braintree\CreditCard;
-
+use ShopgateLibraryException;
 
 /**
- * @coversDefaultClass Shopgate\Import\Model\Service\Import
+ * @coversDefaultClass Import
  *
  * @magentoAppIsolation enabled
  * @magentoDbIsolation  enabled
@@ -41,13 +47,13 @@ use Shopgate\Import\Test\Integration\Data\Payment\Braintree\CreditCard;
  */
 class ImportOrderTest extends TestCase
 {
-    /** @var \Shopgate\Import\Helper\Order */
+    /** @var ShopgateOrder */
     private $orderClass;
-    /** @var \Shopgate\Import\Model\Service\Import */
+    /** @var Import */
     private $importClass;
     /** @var array - list of created orders to clean up */
     private $orderHolder = [];
-    /** @var \Magento\Sales\Api\OrderRepositoryInterface */
+    /** @var OrderRepositoryInterface */
     private $orderRepository;
     /** @var SgDataManager */
     private $dataManager;
@@ -55,9 +61,9 @@ class ImportOrderTest extends TestCase
     public function setUp(): void
     {
         $objectManager         = Bootstrap::getObjectManager();
-        $this->importClass     = $objectManager->create('Shopgate\Import\Model\Service\Import');
-        $this->orderClass      = $objectManager->create('Shopgate\Import\Helper\Order');
-        $this->orderRepository = $objectManager->create('Magento\Sales\Api\OrderRepositoryInterface');
+        $this->importClass     = $objectManager->create(Import::class);
+        $this->orderClass      = $objectManager->create(ShopgateOrder::class);
+        $this->orderRepository = $objectManager->create(OrderRepositoryInterface::class);
         $this->dataManager     = $objectManager->create(SgDataManager::class);
     }
 
@@ -69,14 +75,14 @@ class ImportOrderTest extends TestCase
      * @param \ShopgateOrder $order
      *
      * @dataProvider simpleOrderProvider
-     * @throws \ShopgateLibraryException
+     * @throws ShopgateLibraryException
      */
     public function testOrderImport(\ShopgateOrder $order): void
     {
         $result = $this->importClass->addOrder($order);
-        /** @var \Shopgate\Import\Helper\Order $sgOrder */
-        $sgOrder = Bootstrap::getObjectManager()->get('Shopgate\Import\Helper\Order');
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var ShopgateOrder $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get(ShopgateOrder::class);
+        /** @var MageOrder $order */
         $order = $sgOrder->loadMethods([]);
 
         $this->assertNotEmpty($result);
@@ -92,6 +98,7 @@ class ImportOrderTest extends TestCase
      *
      * @throws Exception
      * @throws ShopgateLibraryException
+     * @throws Exception
      *
      * @dataProvider         paymentDataProvider
      * @magentoConfigFixture default/payment/shopgate/order_status processing
@@ -125,9 +132,9 @@ class ImportOrderTest extends TestCase
         );
 
         $this->orderHolder[] = $this->importClass->addOrder($shopgateOrder);
-        /** @var \Shopgate\Import\Helper\Order $sgOrder */
-        $sgOrder = Bootstrap::getObjectManager()->get('Shopgate\Import\Helper\Order');
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var ShopgateOrder $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get(ShopgateOrder::class);
+        /** @var MageOrder $order */
         $order = $sgOrder->loadMethods([]);
 
         $this->assertEquals($expectedPaymentCode, $order->getPayment()->getMethod());
@@ -159,6 +166,7 @@ class ImportOrderTest extends TestCase
 
     /**
      * @return array
+     * @throws Exception
      */
     public function simpleOrderProvider(): array
     {
@@ -166,7 +174,7 @@ class ImportOrderTest extends TestCase
             'simple order' => [
                 new \ShopgateOrder(
                     [
-                        'order_number'        => rand(1000000000, 9999999999),
+                        'order_number'        => random_int(1000000000, 9999999999),
                         'is_paid'             => 0,
                         'mail'                => 'shopgate@shopgate.com',
                         'amount_shop_payment' => '5.00',
@@ -191,14 +199,16 @@ class ImportOrderTest extends TestCase
 
     /**
      * Delete all created orders & quotes
+     *
+     * @throws NoSuchEntityException
      */
     public function tearDown(): void
     {
-        /** @var \Magento\Framework\Registry $registry */
-        $registry = Bootstrap::getObjectManager()->get('\Magento\Framework\Registry');
+        /** @var Registry $registry */
+        $registry = Bootstrap::getObjectManager()->get(Registry::class);
         $registry->register('isSecureArea', true, true);
-        /** @var \Magento\Quote\Model\QuoteRepository $quoteRepo */
-        $quoteRepo = Bootstrap::getObjectManager()->create('Magento\Quote\Model\QuoteRepository');
+        /** @var QuoteRepository $quoteRepo */
+        $quoteRepo = Bootstrap::getObjectManager()->create(QuoteRepository::class);
 
         foreach ($this->orderHolder as $order) {
             if (isset($order['external_order_id'])) {

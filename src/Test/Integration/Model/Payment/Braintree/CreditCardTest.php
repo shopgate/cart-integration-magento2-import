@@ -76,6 +76,7 @@ class CreditCardTest extends TestCase
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
+     * @throws Exception
      */
     public function testAuthorizeOnlyOrder(): void
     {
@@ -108,6 +109,7 @@ class CreditCardTest extends TestCase
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
+     * @throws Exception
      */
     public function testAuthorizeOnlyForCapturedOrder(): void
     {
@@ -138,6 +140,7 @@ class CreditCardTest extends TestCase
      * @throws ShopgateLibraryException
      * @throws InputException
      * @throws NoSuchEntityException
+     * @throws Exception
      */
     public function testCaptureOrderDuringImport(): void
     {
