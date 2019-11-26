@@ -24,11 +24,13 @@ declare(strict_types=1);
 
 namespace Shopgate\Import\Test\Integration\Model\Service;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
-use Shopgate\Base\Tests\Bootstrap;
+use Magento\TestFramework\Helper\Bootstrap;
 use Shopgate\Base\Tests\Integration\SgDataManager;
 use ShopgateLibraryException;
 use Shopgate\Import\Test\Integration\Data\Payment\Braintree\CreditCard;
+
 
 /**
  * @coversDefaultClass Shopgate\Import\Model\Service\Import
@@ -88,6 +90,7 @@ class ImportOrderTest extends TestCase
      * @param string $paymentMethod
      * @param string $paymentGroup
      *
+     * @throws Exception
      * @throws ShopgateLibraryException
      *
      * @dataProvider         paymentDataProvider
