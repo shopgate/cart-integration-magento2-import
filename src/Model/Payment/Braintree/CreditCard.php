@@ -29,7 +29,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
-use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Vault\Api\Data\PaymentTokenFactoryInterface;
@@ -37,15 +36,13 @@ use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
 use Shopgate\Import\Helper\Payment\Braintree as Helper;
-use Shopgate\Import\Model\Payment\AbstractPayment;
 
-class CreditCard extends AbstractPayment
+class CreditCard extends Base
 {
-    protected const  MODULE_NAME               = 'Magento_Braintree';
-    protected const  PAYMENT_CODE              = 'braintree';
-    protected const  XML_CONFIG_ENABLED        = 'payment/braintree/active';
-    private const    XML_CONFIG_PAYMENT_ACTION = 'payment/braintree/payment_action';
-    private const    CREDIT_CARD_TYPE_MAP      = [
+    protected const  MODULE_NAME          = 'Magento_Braintree';
+    protected const  PAYMENT_CODE         = 'braintree';
+    protected const  XML_CONFIG_ENABLED   = 'payment/braintree/active';
+    private const    CREDIT_CARD_TYPE_MAP = [
         'visa'       => 'VI',
         'maestro'    => 'MI',
         'mastercard' => 'MC',
@@ -192,42 +189,5 @@ class CreditCard extends AbstractPayment
     private function getMappedCCType(string $ccType): string
     {
         return static::CREDIT_CARD_TYPE_MAP[$ccType];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function manipulateOrderWithPaymentDataAfterSave(
-        MagentoOrder $magentoOrder,
-        ShopgateOrder $shopgateOrder
-    ): void {
-        $payment = $magentoOrder->getPayment();
-        if ($shopgateOrder->getIsPaid()) {
-            // presumably Shopgate captured, so we should not
-            $payment->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
-        } elseif ($this->shouldCaptureOnline()) {
-            $payment->capture();
-        }
-    }
-
-    /**
-     * Checks of Braintree CC is configured to authorize and capture
-     *
-     * @return bool
-     */
-    private function shouldCaptureOnline(): bool
-    {
-        $configuredPaymentAction = $this->scopeConfig->getConfigByPath(self::XML_CONFIG_PAYMENT_ACTION)->getValue();
-
-        return $configuredPaymentAction === MethodInterface::ACTION_AUTHORIZE_CAPTURE;
-    }
-
-    /**
-     * Will be handled automatically, therefor empty
-     *
-     * @inheritDoc
-     */
-    public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
-    {
     }
 }
