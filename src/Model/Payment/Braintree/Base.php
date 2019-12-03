@@ -31,6 +31,9 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Base extends AbstractPayment
 {
+    /**
+     * The config path for the selected action method
+     */
     private const XML_CONFIG_PAYMENT_ACTION = 'payment/%s/payment_action';
 
     /**
