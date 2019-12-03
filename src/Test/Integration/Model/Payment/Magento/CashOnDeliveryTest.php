@@ -28,15 +28,8 @@ use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Magento\Sales\Model\OrderRepository;
-use Magento\TestFramework\Helper\Bootstrap;
-use Magento\TestFramework\ObjectManager;
-use PHPUnit\Framework\TestCase;
-use Shopgate\Base\Tests\Integration\SgDataManager;
-use Shopgate\Import\Model\Service\Import;
 use Shopgate\Import\Test\Integration\Model\Payment\BaseTest;
 use ShopgateLibraryException;
-use ShopgateOrder;
 
 /**
  * @magentoAppIsolation enabled
