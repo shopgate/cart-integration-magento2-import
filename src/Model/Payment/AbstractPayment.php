@@ -55,7 +55,7 @@ abstract class AbstractPayment
     /**
      * Map payment method on quote
      */
-    protected const MAP_ON_QUOTE = true;
+    protected const IS_OFFLINE = true;
 
     /** @var CoreInterface */
     protected $scopeConfig;
@@ -189,10 +189,12 @@ abstract class AbstractPayment
     }
 
     /**
+     * Should set the payment method on create quote
+     *
      * @return bool
      */
-    public function shouldMapOnQuote(): bool
+    public function getIsOffline(): bool
     {
-        return static::MAP_ON_QUOTE;
+        return static::IS_OFFLINE;
     }
 }

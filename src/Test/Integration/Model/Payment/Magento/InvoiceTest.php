@@ -20,50 +20,34 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Payment\Shopgate;
 
 use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Magento\Sales\Model\OrderRepository;
-use Magento\TestFramework\Helper\Bootstrap;
-use Magento\TestFramework\ObjectManager;
-use PHPUnit\Framework\TestCase;
-use Shopgate\Base\Tests\Integration\SgDataManager;
-use Shopgate\Import\Model\Service\Import;
+use Shopgate\Import\Test\Integration\Model\Payment\BaseTest;
 use ShopgateLibraryException;
-use ShopgateOrder;
 
 /**
  * @magentoAppIsolation enabled
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class InvoiceTest extends TestCase
+class InvoiceTest extends BaseTest
 {
-    /** @var ObjectManager $objectManager */
-    private $objectManager;
-    /** @var Import */
-    private $importClass;
-    /** @var OrderRepository */
-    private $orderRepository;
-    /** @var SgDataManager */
-    private $dataManager;
-
-    /**
-     * Integration test preparation
-     */
-    public function setUp()
-    {
-        $this->objectManager   = Bootstrap::getObjectManager();
-        $this->importClass     = $this->objectManager->create(Import::class);
-        $this->orderRepository = $this->objectManager->create(OrderRepository::class);
-        $this->dataManager     = $this->objectManager->create(SgDataManager::class);
-    }
+    /** @var array */
+    protected const ORDER_CONFIG = [
+        'payment_method' => 'INVOICE',
+        'payment_group' => 'INVOICE',
+    ];
 
     /**
      * @magentoConfigFixture current_store payment/checkmo/active 1
+     *
+     * @param int $isPaid
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -74,7 +58,7 @@ class InvoiceTest extends TestCase
      */
     public function testPaymentMappingOnImport($isPaid): void
     {
-        $result = $this->importClass->addOrder($this->getShopgateOrder($isPaid));
+        $result = $this->importClass->addOrder($this->getShopgateOrder($isPaid, static::ORDER_CONFIG));
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
@@ -92,44 +76,12 @@ class InvoiceTest extends TestCase
      */
     public function testInactivePaymentMappingOnImport(): void
     {
-        $result = $this->importClass->addOrder($this->getShopgateOrder());
+        $result = $this->importClass->addOrder($this->getShopgateOrder(), static::ORDER_CONFIG);
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
         $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
         $this->assertEquals('pending', $magentoOrder->getStatus());
-    }
-
-
-    /**
-     * @param int $isPaid
-     *
-     * @return ShopgateOrder
-     *
-     * @throws Exception
-     */
-    private function getShopgateOrder(int $isPaid = 0): ShopgateOrder
-    {
-        return new ShopgateOrder(
-            [
-                'order_number'               => random_int(1000000000, 9999999999),
-                'is_paid'                    => $isPaid,
-                'payment_time'               => null,
-                'payment_transaction_number' => (string) random_int(1000000000, 9999999999),
-                'mail'                       => 'shopgate@shopgate.com',
-                'amount_shop_payment'        => '5.00',
-                'amount_complete'            => '149.85',
-                'shipping_infos'             => ['amount' => '4.90'],
-                'invoice_address'            => $this->dataManager->getGermanAddress(),
-                'delivery_address'           => $this->dataManager->getGermanAddress(false),
-                'external_coupons'           => [],
-                'shopgate_coupons'           => [],
-                'items'                      => [$this->dataManager->getSimpleProduct()],
-                'payment_infos'              => [],
-                'payment_method'             => 'INVOICE',
-                'payment_group'              => 'INVOICE'
-            ]
-        );
     }
 
     /**
