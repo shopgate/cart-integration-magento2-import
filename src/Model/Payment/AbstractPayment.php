@@ -62,7 +62,7 @@ abstract class AbstractPayment
     /** @var Manager */
     private $moduleManager;
     /** @var PaymentHelper */
-    public $paymentHelper;
+    private $paymentHelper;
     /** @var Utility */
     private $utility;
 
