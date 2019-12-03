@@ -42,8 +42,8 @@ use ShopgateOrder;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class BaseTest extends TestCase {
-
+class BaseTest extends TestCase
+{
     /** @var ObjectManager $objectManager */
     protected $objectManager;
     /** @var Import */
