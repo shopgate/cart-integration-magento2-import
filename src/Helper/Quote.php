@@ -34,7 +34,6 @@ use Shopgate\Base\Helper\Product\Type;
 use Shopgate\Base\Helper\Product\Utility;
 use Shopgate\Base\Helper\Quote\Coupon;
 use Shopgate\Base\Helper\Quote\Customer;
-use Shopgate\Base\Model\Payment\Shopgate;
 use Shopgate\Base\Model\Rule\Condition\ShopgateOrder as OrderCondition;
 use Shopgate\Base\Model\Shopgate\Extended;
 use Shopgate\Base\Model\Utility\Registry;
@@ -158,11 +157,15 @@ class Quote extends \Shopgate\Base\Helper\Quote
      */
     protected function setPayment()
     {
-        $defaultPayment = $this->paymentFactory->getPayment(strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD));
+        $mappedPaymentMethod = $this->paymentFactory->getPayment($this->sgBase->getPaymentMethod());
+        $paymentMethod       = $mappedPaymentMethod->shouldMapOnQuote()
+            ? $mappedPaymentMethod
+            : $this->paymentFactory->getPayment(strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD));
+
         $this->quote->getPayment()->importData(
             [
-                'method'                              => $defaultPayment->getPaymentModel()->getCode(),
-                PaymentInterface::KEY_ADDITIONAL_DATA => $defaultPayment->getAdditionalPaymentData($this->sgBase)
+                'method'                              => $paymentMethod->getPaymentModel()->getCode(),
+                PaymentInterface::KEY_ADDITIONAL_DATA => $paymentMethod->getAdditionalPaymentData($this->sgBase)
             ]
         );
         $this->quote->getPayment()->setParentTransactionId($this->sgBase->getPaymentTransactionNumber());

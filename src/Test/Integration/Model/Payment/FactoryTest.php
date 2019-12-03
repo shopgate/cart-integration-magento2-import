@@ -72,8 +72,11 @@ class FactoryTest extends TestCase
     public function paymentMethodProvider(): array
     {
         return [
-            'return shopgate as default payment method' => ['PREPAY', 'shopgate'],
-            'Braintree Credit Card' => ['BRAINTR_CC', 'braintree']
+            'return shopgate as default payment method' => ['SOMETHING', 'shopgate'],
+            'Bank Transfer'                             => ['PREPAY', 'banktransfer'],
+            'Cash on delivery'                          => ['COD', 'cashondelivery'],
+            'Invoice'                                   => ['INVOICE', 'checkmo'],
+            'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
         ];
     }
 }

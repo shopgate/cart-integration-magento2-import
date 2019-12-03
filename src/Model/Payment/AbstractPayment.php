@@ -52,13 +52,17 @@ abstract class AbstractPayment
      * The code of the magento payment method
      */
     protected const PAYMENT_CODE = '';
+    /**
+     * Map payment method on quote
+     */
+    protected const MAP_ON_QUOTE = true;
 
     /** @var CoreInterface */
     protected $scopeConfig;
     /** @var Manager */
     private $moduleManager;
     /** @var PaymentHelper */
-    private $paymentHelper;
+    public $paymentHelper;
     /** @var Utility */
     private $utility;
 
@@ -182,5 +186,13 @@ abstract class AbstractPayment
         return [
             Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldMapOnQuote(): bool
+    {
+        return static::MAP_ON_QUOTE;
     }
 }

@@ -40,7 +40,7 @@ use ShopgateOrder;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class ShopgateTest extends TestCase
+class CashOnDeliveryTest extends TestCase
 {
     /** @var ObjectManager $objectManager */
     private $objectManager;
@@ -78,7 +78,7 @@ class ShopgateTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('cod', $magentoOrder->getPayment()->getMethod());
         $this->assertEquals('processing', $magentoOrder->getStatus());
     }
 
@@ -107,8 +107,8 @@ class ShopgateTest extends TestCase
                 'shopgate_coupons'           => [],
                 'items'                      => [$this->dataManager->getSimpleProduct()],
                 'payment_infos'              => [],
-                'payment_method'             => 'PREPAY',
-                'payment_group'              => 'PREPAY'
+                'payment_method'             => 'COD',
+                'payment_group'              => 'COD'
             ]
         );
     }
@@ -119,7 +119,7 @@ class ShopgateTest extends TestCase
     public function paidFlagProvider(): array
     {
         return [
-            'Paid order'   => [1],
+            'Paid order'   => [0],
             'Unpaid order' => [0],
         ];
     }
