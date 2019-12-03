@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Payment mapping is now based on factories
 ### Added
 - Mapping for Braintree CreditCard payment method
-- Mapping for magento default COD, Invoice and prepayment payment method
+- Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
 
 ### Removed
 - Support for PHP < 7.1
