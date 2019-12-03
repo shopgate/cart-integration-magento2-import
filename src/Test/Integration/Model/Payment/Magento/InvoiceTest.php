@@ -133,7 +133,7 @@ class InvoiceTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return int[]
      */
     public function paidFlagProvider(): array
     {
