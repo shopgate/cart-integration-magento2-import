@@ -136,7 +136,7 @@ class CreditCardTest extends TestCase
 
     /**
      * @magentoConfigFixture current_store payment/braintree/active 1
-     * @magentoConfigFixture current_store payment/braintree/payment_action capture
+     * @magentoConfigFixture current_store payment/braintree/payment_action authorize_capture
      *
      * @throws Exception
      * @throws ShopgateLibraryException

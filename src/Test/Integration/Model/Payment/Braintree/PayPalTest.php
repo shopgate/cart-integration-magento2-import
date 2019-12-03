@@ -87,21 +87,12 @@ class PayPalTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $authorisationTransaction = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_AUTH, $magentoOrder->getPayment()->getEntityId());
-        $captureTransaction       = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_CAPTURE, $magentoOrder->getPayment()->getEntityId());
-
         $this->assertEquals(ConfigProvider::PAYPAL_CODE, $magentoOrder->getPayment()->getMethod());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getCcTransId());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getLastTransId());
         $this->assertTrue($magentoOrder->getPayment()->canCapture());
 
-        // auth only
-        $this->assertFalse($captureTransaction);
-
-        $this->assertEquals(0, $authorisationTransaction->getIsClosed());
-        $this->assertEquals(PayPal::TRANSACTION_ID, $authorisationTransaction->getData('txn_id'));
+        $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_AUTH);
     }
 
     /**
@@ -151,24 +142,16 @@ class PayPalTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $authorisationTransaction = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_AUTH, $magentoOrder->getPayment()->getEntityId());
-        $captureTransaction       = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_CAPTURE, $magentoOrder->getPayment()->getEntityId());
-
         $this->assertEquals(ConfigProvider::PAYPAL_CODE, $magentoOrder->getPayment()->getMethod());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getCcTransId());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getLastTransId());
 
-        // auth only
-        $this->assertFalse($authorisationTransaction);
-        $this->assertEquals(0, $captureTransaction->getIsClosed());
-        $this->assertEquals(PayPal::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+        $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_CAPTURE);
     }
 
     /**
      * @magentoConfigFixture current_store payment/braintree_paypal/active 1
-     * @magentoConfigFixture current_store payment/braintree_paypal/payment_action capture
+     * @magentoConfigFixture current_store payment/braintree_paypal/payment_action authorize_capture
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -182,18 +165,36 @@ class PayPalTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $authorisationTransaction = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_AUTH, $magentoOrder->getPayment()->getEntityId());
-        $captureTransaction       = $this->transactionRepository
-            ->getByTransactionType(Transaction::TYPE_CAPTURE, $magentoOrder->getPayment()->getEntityId());
-
         $this->assertEquals(ConfigProvider::PAYPAL_CODE, $magentoOrder->getPayment()->getMethod());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getCcTransId());
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getLastTransId());
 
-        $this->assertFalse($authorisationTransaction);
+        $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_CAPTURE);
+    }
 
-        $this->assertEquals(0, $captureTransaction->getIsClosed());
-        $this->assertEquals(PayPal::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+    /**
+     * @param string $paymentId
+     * @param string $transactionType
+     *
+     * @throws InputException
+     */
+    private function validateTransaction(string $paymentId, string $transactionType): void
+    {
+        $authorisationTransaction = $this->transactionRepository
+            ->getByTransactionType(Transaction::TYPE_AUTH, $paymentId);
+        $captureTransaction       = $this->transactionRepository
+            ->getByTransactionType(Transaction::TYPE_CAPTURE, $paymentId);
+
+        $transactionToTest = $transactionType === Transaction::TYPE_AUTH
+            ? $authorisationTransaction
+            : $captureTransaction;
+
+        $transactionToMiss = $transactionType === Transaction::TYPE_AUTH
+            ? $captureTransaction
+            : $authorisationTransaction;
+
+        $this->assertFalse($transactionToMiss);
+        $this->assertEquals(0, $transactionToTest->getIsClosed());
+        $this->assertEquals(PayPal::TRANSACTION_ID, $transactionToTest->getData('txn_id'));
     }
 }
