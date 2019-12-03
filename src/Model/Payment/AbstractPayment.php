@@ -189,11 +189,11 @@ abstract class AbstractPayment
     }
 
     /**
-     * Should set the payment method on create quote
+     * Check is offline payment method
      *
      * @return bool
      */
-    public function getIsOffline(): bool
+    public function isOffline(): bool
     {
         return static::IS_OFFLINE;
     }

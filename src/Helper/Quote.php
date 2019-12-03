@@ -158,7 +158,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
     protected function setPayment()
     {
         $mappedPaymentMethod = $this->paymentFactory->getPayment($this->sgBase->getPaymentMethod());
-        $paymentMethod       = $mappedPaymentMethod->getIsOffline()
+        $paymentMethod       = $mappedPaymentMethod->isOffline()
             ? $mappedPaymentMethod
             : $this->paymentFactory->getPayment(strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD));
 
