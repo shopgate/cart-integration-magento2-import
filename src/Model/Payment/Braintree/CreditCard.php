@@ -141,8 +141,8 @@ class CreditCard extends Base
                              )
                          )->setTokenDetails($this->serializer->serialize($paymentTokenDetails));
 
-            $extensionAttributes->setData('vault_payment_token', $paymentToken);
-//            $extensionAttributes->setVaultPaymentToken($paymentToken);
+            /** @noinspection PhpUndefinedMethodInspection */
+            $extensionAttributes->setVaultPaymentToken($paymentToken);
             $payment->setExtensionAttributes($extensionAttributes);
         }
         $payment->save();
