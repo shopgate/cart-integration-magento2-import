@@ -103,18 +103,18 @@ class PayPal extends Base
     public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
     {
         $paymentInformation    = $shopgateOrder->getPaymentInfos();
+        $providerResponse      = $paymentInformation['provider_response'] ?? [];
         $additionalPaymentData = [
             'method_title'          => $paymentInformation['shopgate_payment_name'],
             'processorResponseCode' => $paymentInformation['processor_response_code'],
             'processorResponseText' => $paymentInformation['processor_response_text']
         ];
 
-        // todo-sg: structure might change, still waiting for final approval
-        if (isset($paymentInformation['paymentId'])) {
-            $additionalPaymentData['paymentId'] = $paymentInformation['paymentId'];
+        if (isset($providerResponse['paymentId'])) {
+            $additionalPaymentData['paymentId'] = $providerResponse['paymentId'];
         }
-        if (isset($paymentInformation['payerEmail'])) {
-            $additionalPaymentData['payerEmail'] = $paymentInformation['payerEmail'];
+        if (isset($providerResponse['payerEmail'])) {
+            $additionalPaymentData['payerEmail'] = $providerResponse['payerEmail'];
         }
 
         if (!empty($paymentInformation['risk_data'])) {
