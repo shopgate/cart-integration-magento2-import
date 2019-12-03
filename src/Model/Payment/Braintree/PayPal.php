@@ -109,15 +109,23 @@ class PayPal extends Base
             'processorResponseText' => $paymentInformation['processor_response_text']
         ];
 
-        if (isset($paymentInformation['paypal'])) {
-            $paypalData = $paymentInformation['paypal'];
-            if (isset($paypalData['paymentId'])) {
-                $additionalPaymentData['paymentId'] = $paypalData['payment_id'];
-            }
+//        if (isset($paymentInformation['paypal'])) {
+//            $paypalData = $paymentInformation['paypal'];
+//            if (isset($paypalData['paymentId'])) {
+//                $additionalPaymentData['paymentId'] = $paypalData['payment_id'];
+//            }
+//
+//            if (isset($paypalData['payerEmail'])) {
+//                $additionalPaymentData['payerEmail'] = $paypalData['payer_email'];
+//            }
+//        }
 
-            if (isset($paypalData['payerEmail'])) {
-                $additionalPaymentData['payerEmail'] = $paypalData['payer_email'];
-            }
+        if (isset($paymentInformation['paymentId'])) {
+            $additionalPaymentData['paymentId'] = $paymentInformation['paymentId'];
+        }
+
+        if (isset($paymentInformation['payerEmail'])) {
+            $additionalPaymentData['payerEmail'] = $paymentInformation['payerEmail'];
         }
 
         if (!empty($paymentInformation['risk_data'])) {
