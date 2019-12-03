@@ -127,7 +127,7 @@ abstract class AbstractPayment
      */
     public function isEnabled(): bool
     {
-        return (bool) $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
+        return static::XML_CONFIG_ENABLED !== '' && (bool)$this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
     }
 
     /**

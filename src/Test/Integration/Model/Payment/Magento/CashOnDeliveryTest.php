@@ -63,7 +63,7 @@ class CashOnDeliveryTest extends TestCase
     }
 
     /**
-     * @magentoConfigFixture current_store payment/shopgate/order_status processing
+     * @magentoConfigFixture current_store payment/cashondelivery/active 1
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -78,9 +78,28 @@ class CashOnDeliveryTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $this->assertEquals('cod', $magentoOrder->getPayment()->getMethod());
-        $this->assertEquals('processing', $magentoOrder->getStatus());
+        $this->assertEquals('cashondelivery', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
     }
+
+    /**
+     * @magentoConfigFixture current_store payment/cashondelivery/active 0
+     *
+     * @throws Exception
+     * @throws ShopgateLibraryException
+     * @throws InputException
+     * @throws NoSuchEntityException
+     */
+    public function testInactivePaymentMappingOnImport(): void
+    {
+        $result = $this->importClass->addOrder($this->getShopgateOrder());
+        /** @var MagentoOrder $magentoOrder */
+        $magentoOrder = $this->orderRepository->get($result['external_order_id']);
+
+        $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
+    }
+
 
     /**
      * @param int $isPaid
@@ -119,7 +138,7 @@ class CashOnDeliveryTest extends TestCase
     public function paidFlagProvider(): array
     {
         return [
-            'Paid order'   => [0],
+            'Paid order'   => [1],
             'Unpaid order' => [0],
         ];
     }

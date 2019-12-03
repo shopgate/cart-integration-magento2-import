@@ -40,7 +40,7 @@ use ShopgateOrder;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class ShopgateTest extends TestCase
+class PrepaymentTest extends TestCase
 {
     /** @var ObjectManager $objectManager */
     private $objectManager;
@@ -63,7 +63,7 @@ class ShopgateTest extends TestCase
     }
 
     /**
-     * @magentoConfigFixture current_store payment/shopgate/order_status processing
+     * @magentoConfigFixture current_store payment/banktransfer/active 1
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -78,9 +78,28 @@ class ShopgateTest extends TestCase
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
-        $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
-        $this->assertEquals('processing', $magentoOrder->getStatus());
+        $this->assertEquals('banktransfer', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
     }
+
+    /**
+     * @magentoConfigFixture current_store payment/banktransfer/active 0
+     *
+     * @throws Exception
+     * @throws ShopgateLibraryException
+     * @throws InputException
+     * @throws NoSuchEntityException
+     */
+    public function testInactivePaymentMappingOnImport(): void
+    {
+        $result = $this->importClass->addOrder($this->getShopgateOrder());
+        /** @var MagentoOrder $magentoOrder */
+        $magentoOrder = $this->orderRepository->get($result['external_order_id']);
+
+        $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
+    }
+
 
     /**
      * @param int $isPaid
@@ -107,8 +126,8 @@ class ShopgateTest extends TestCase
                 'shopgate_coupons'           => [],
                 'items'                      => [$this->dataManager->getSimpleProduct()],
                 'payment_infos'              => [],
-                'payment_method'             => 'SHOPGATE',
-                'payment_group'              => 'SHOPGATE'
+                'payment_method'             => 'PREPAY',
+                'payment_group'              => 'PREPAY'
             ]
         );
     }

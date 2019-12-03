@@ -28,7 +28,8 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Prepayment extends AbstractPayment
 {
-    protected const MODULE_NAME              = 'Magento_OfflinePayments';
-    protected const PAYMENT_CODE             = 'banktransfer';
-    protected const XML_CONFIG_ORDER_STATUS  = 'payment/banktransfer/order_status';
+    protected const  MODULE_NAME             = 'Magento_OfflinePayments';
+    protected const  PAYMENT_CODE            = 'banktransfer';
+    protected const  XML_CONFIG_ORDER_STATUS = 'payment/banktransfer/order_status';
+    protected const  XML_CONFIG_ENABLED      = 'payment/banktransfer/active';
 }
