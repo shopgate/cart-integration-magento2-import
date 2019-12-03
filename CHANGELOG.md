@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
 ## [2.9.13] - 2019-11-26
 ### Changed
 - Payment mapping is now based on factories
 ### Added
 - Mapping for Braintree CreditCard payment method
-- Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
 
 ### Removed
 - Support for PHP < 7.1

@@ -28,8 +28,8 @@ use Shopgate\Import\Model\Payment\AbstractPayment;
 
 class Invoice extends AbstractPayment
 {
-    protected const  MODULE_NAME             = 'Magento_OfflinePayments';
-    protected const  PAYMENT_CODE            = 'checkmo';
-    protected const  XML_CONFIG_ORDER_STATUS = 'payment/checkmo/order_status';
-    protected const  XML_CONFIG_ENABLED      = 'payment/checkmo/active';
+    protected const MODULE_NAME             = 'Magento_OfflinePayments';
+    protected const PAYMENT_CODE            = 'checkmo';
+    protected const XML_CONFIG_ORDER_STATUS = 'payment/checkmo/order_status';
+    protected const XML_CONFIG_ENABLED      = 'payment/checkmo/active';
 }
