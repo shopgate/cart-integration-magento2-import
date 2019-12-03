@@ -54,7 +54,6 @@ class Base extends AbstractPayment
     ): void {
         $payment = $magentoOrder->getPayment();
         if ($shopgateOrder->getIsPaid()) {
-            // presumably Shopgate captured, so we should not
             $payment->registerCaptureNotification($shopgateOrder->getAmountComplete(), true);
         } elseif ($this->shouldCaptureOnline()) {
             $payment->capture();
