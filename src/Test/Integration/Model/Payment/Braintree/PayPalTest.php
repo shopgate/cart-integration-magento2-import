@@ -20,9 +20,12 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Payment\Braintree;
 
 use Exception;
+use Magento\Braintree\Model\Ui\PayPal\ConfigProvider;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
@@ -37,7 +40,6 @@ use Shopgate\Import\Model\Service\Import;
 use Shopgate\Import\Test\Integration\Data\Payment\Braintree\PayPal;
 use ShopgateLibraryException;
 use ShopgateOrder;
-use Magento\Braintree\Model\Ui\PayPal\ConfigProvider;
 
 /**
  * @magentoAppIsolation enabled
@@ -103,6 +105,37 @@ class PayPalTest extends TestCase
     }
 
     /**
+     * @param int $isPaid
+     *
+     * @return ShopgateOrder
+     *
+     * @throws Exception
+     */
+    private function getShopgateOrder(int $isPaid = 0): ShopgateOrder
+    {
+        return new ShopgateOrder(
+            [
+                'order_number'               => random_int(1000000000, 9999999999),
+                'is_paid'                    => $isPaid,
+                'payment_time'               => null,
+                'payment_transaction_number' => (string) random_int(1000000000, 9999999999),
+                'mail'                       => 'shopgate@shopgate.com',
+                'amount_shop_payment'        => '5.00',
+                'amount_complete'            => '149.85',
+                'shipping_infos'             => ['amount' => '4.90'],
+                'invoice_address'            => $this->dataManager->getGermanAddress(),
+                'delivery_address'           => $this->dataManager->getGermanAddress(false),
+                'external_coupons'           => [],
+                'shopgate_coupons'           => [],
+                'items'                      => [$this->dataManager->getSimpleProduct()],
+                'payment_infos'              => PayPal::getAdditionalPayment(),
+                'payment_method'             => 'BRAINTR_PP',
+                'payment_group'              => 'PAYPAL'
+            ]
+        );
+    }
+
+    /**
      * @magentoConfigFixture current_store payment/braintree_paypal/active 1
      * @magentoConfigFixture current_store payment/braintree_paypal/payment_action authorize
      *
@@ -162,36 +195,5 @@ class PayPalTest extends TestCase
 
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(PayPal::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
-    }
-
-    /**
-     * @param int $isPaid
-     *
-     * @return ShopgateOrder
-     *
-     * @throws Exception
-     */
-    private function getShopgateOrder(int $isPaid = 0): ShopgateOrder
-    {
-        return new ShopgateOrder(
-            [
-                'order_number'               => random_int(1000000000, 9999999999),
-                'is_paid'                    => $isPaid,
-                'payment_time'               => null,
-                'payment_transaction_number' => (string) random_int(1000000000, 9999999999),
-                'mail'                       => 'shopgate@shopgate.com',
-                'amount_shop_payment'        => '5.00',
-                'amount_complete'            => '149.85',
-                'shipping_infos'             => ['amount' => '4.90'],
-                'invoice_address'            => $this->dataManager->getGermanAddress(),
-                'delivery_address'           => $this->dataManager->getGermanAddress(false),
-                'external_coupons'           => [],
-                'shopgate_coupons'           => [],
-                'items'                      => [$this->dataManager->getSimpleProduct()],
-                'payment_infos'              => PayPal::getAdditionalPayment(),
-                'payment_method'             => 'BRAINTR_PP',
-                'payment_group'              => 'PAYPAL'
-            ]
-        );
     }
 }
