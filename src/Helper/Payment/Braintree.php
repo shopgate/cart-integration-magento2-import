@@ -26,10 +26,23 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use Magento\Braintree\Model\InstantPurchase\CreditCard\TokenFormatter;
 
 class Braintree
 {
+    /**
+     * Most used credit card types
+     * @var array
+     */
+    public const BASE_CARD_TYPES = [
+        'AE' => 'American Express',
+        'VI' => 'Visa',
+        'MC' => 'MasterCard',
+        'DI' => 'Discover',
+        'JBC' => 'JBC',
+        'CUP' => 'China Union Pay',
+        'MI' => 'Maestro',
+    ];
+
     /**
      * @param string $expirationYear
      * @param string $expirationMonth
@@ -82,7 +95,7 @@ class Braintree
      */
     public function formatVisibleCCType(string $ccType): string
     {
-        return TokenFormatter::$baseCardTypes[$ccType] ?? $ccType;
+        return self::BASE_CARD_TYPES[$ccType] ?? $ccType;
     }
 
     /**
