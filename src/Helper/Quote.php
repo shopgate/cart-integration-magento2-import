@@ -39,6 +39,7 @@ use Shopgate\Base\Model\Shopgate\Extended;
 use Shopgate\Base\Model\Utility\Registry;
 use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
+use ShopgateLibraryException;
 
 class Quote extends \Shopgate\Base\Helper\Quote
 {
@@ -151,9 +152,11 @@ class Quote extends \Shopgate\Base\Helper\Quote
     }
 
     /**
-     * Assigns shipping method to the quote
+     * If it's an online method, the default Shopgate payment method is used as it will not trigger capture when the
+     * quote turns into an order. We manipulate the online payment method after the order is created.
      *
      * @throws LocalizedException
+     * @throws \ShopgateLibraryException
      */
     protected function setPayment()
     {
@@ -162,10 +165,15 @@ class Quote extends \Shopgate\Base\Helper\Quote
             ? $mappedPaymentMethod
             : $this->paymentFactory->getPayment(strtolower(PaymentFactory::DEFAULT_PAYMENT_METHOD));
 
+        if (!$paymentMethod->getPaymentModel()) {
+            throw new ShopgateLibraryException(ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+                'No payment model set for payment method');
+        }
+
         $this->quote->getPayment()->importData(
             [
                 'method'                              => $paymentMethod->getPaymentModel()->getCode(),
-                PaymentInterface::KEY_ADDITIONAL_DATA => $paymentMethod->getAdditionalPaymentData($this->sgBase)
+                PaymentInterface::KEY_ADDITIONAL_DATA => $paymentMethod->getAdditionalPaymentData($this->sgBase),
             ]
         );
         $this->quote->getPayment()->setParentTransactionId($this->sgBase->getPaymentTransactionNumber());

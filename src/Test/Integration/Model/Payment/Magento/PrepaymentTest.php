@@ -76,7 +76,7 @@ class PrepaymentTest extends BaseTest
      */
     public function testInactivePaymentMappingOnImport(): void
     {
-        $result = $this->importClass->addOrder($this->getShopgateOrder(), static::ORDER_CONFIG);
+        $result = $this->importClass->addOrder($this->getShopgateOrder(0, static::ORDER_CONFIG));
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 

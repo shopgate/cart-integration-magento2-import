@@ -33,6 +33,7 @@ use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Payment\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
+use ShopgateLibraryException;
 
 abstract class AbstractPayment
 {
@@ -96,6 +97,7 @@ abstract class AbstractPayment
      *
      * @return MethodInterface|null
      * @throws LocalizedException
+     * @throws ShopgateLibraryException
      */
     public function getPaymentModel(): ?MethodInterface
     {
@@ -104,6 +106,7 @@ abstract class AbstractPayment
 
     /**
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isValid(): bool
     {
@@ -124,10 +127,50 @@ abstract class AbstractPayment
      * Checks if a payment method is enabled
      *
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isEnabled(): bool
     {
-        return static::XML_CONFIG_ENABLED !== '' && (bool) $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
+        $this->validatePaymentSettings();
+
+        return (bool)$this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
+    }
+
+    /**
+     * Validate the payment settings
+     *
+     * @throws ShopgateLibraryException
+     */
+    private function validatePaymentSettings(): void
+    {
+        if (static::XML_CONFIG_ENABLED === '') {
+            $this->throwValidateException('No XML config enabled path set for payment');
+        }
+
+        if (static::XML_CONFIG_ORDER_STATUS === '') {
+            $this->throwValidateException('No XML config order status set for payment');
+        }
+
+        if (static::MODULE_NAME === '') {
+            $this->throwValidateException('No module name set for payment');
+        }
+
+        if (static::PAYMENT_CODE === '') {
+            $this->throwValidateException('No payment code set for payment');
+        }
+    }
+
+    /**
+     * Throw a validate exception
+     *
+     * @param $message
+     *
+     * @throws ShopgateLibraryException
+     */
+    private function throwValidateException($message): void
+    {
+        throw new ShopgateLibraryException(ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+            sprintf('%s (%s)', $message, static::class), true);
     }
 
     /**
@@ -189,7 +232,8 @@ abstract class AbstractPayment
     }
 
     /**
-     * Check is offline payment method
+     * An offline payment means that the payment code will be set to the quote before it is saved. The reason being is
+     * that unlike online payments, offline will not trigger capture when the quote is turned into an order.
      *
      * @return bool
      */

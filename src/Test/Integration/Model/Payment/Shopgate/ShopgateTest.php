@@ -39,7 +39,7 @@ class ShopgateTest extends BaseTest
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'SHOPGATE',
-        'payment_group' => 'SHOPGATE',
+        'payment_group'  => 'SHOPGATE',
     ];
 
     /**
