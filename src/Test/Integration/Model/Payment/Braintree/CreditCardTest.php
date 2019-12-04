@@ -20,6 +20,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Payment\Braintree;
 
 use Exception;
@@ -134,7 +136,7 @@ class CreditCardTest extends TestCase
 
     /**
      * @magentoConfigFixture current_store payment/braintree/active 1
-     * @magentoConfigFixture current_store payment/braintree/payment_action capture
+     * @magentoConfigFixture current_store payment/braintree/payment_action authorize_capture
      *
      * @throws Exception
      * @throws ShopgateLibraryException

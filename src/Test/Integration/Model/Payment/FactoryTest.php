@@ -20,6 +20,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Payment;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -56,6 +58,7 @@ class FactoryTest extends TestCase
      * @throws LocalizedException
      *
      * @magentoConfigFixture current_store payment/braintree/active 1
+     * @magentoConfigFixture current_store payment/braintree_paypal/active 1
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
@@ -73,7 +76,8 @@ class FactoryTest extends TestCase
     {
         return [
             'return shopgate as default payment method' => ['PREPAY', 'shopgate'],
-            'Braintree Credit Card' => ['BRAINTR_CC', 'braintree']
+            'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
+            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal']
         ];
     }
 }
