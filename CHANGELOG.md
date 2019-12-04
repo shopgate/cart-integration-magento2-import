@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 - Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
+- Mapping for Braintree PayPal payment method
+
+>>>>>>> develop
 ## [2.9.13] - 2019-11-26
 ### Changed
 - Payment mapping is now based on factories

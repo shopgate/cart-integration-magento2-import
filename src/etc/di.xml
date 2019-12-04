@@ -41,6 +41,7 @@
                 <item name="COD" xsi:type="object">Shopgate\Import\Model\Payment\Magento\CashOnDeliveryFactory</item>
                 <item name="PREPAY" xsi:type="object">Shopgate\Import\Model\Payment\Magento\PrepaymentFactory</item>
                 <item name="INVOICE" xsi:type="object">Shopgate\Import\Model\Payment\Magento\InvoiceFactory</item>
+                <item name="BRAINTR_PP" xsi:type="object">Shopgate\Import\Model\Payment\Braintree\PayPalFactory</item>
             </argument>
         </arguments>
     </type>
