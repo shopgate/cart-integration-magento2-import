@@ -31,16 +31,17 @@ class Braintree
 {
     /**
      * Most used credit card types
+     *
      * @var array
      */
     public const BASE_CARD_TYPES = [
-        'AE' => 'American Express',
-        'VI' => 'Visa',
-        'MC' => 'MasterCard',
-        'DI' => 'Discover',
+        'AE'  => 'American Express',
+        'VI'  => 'Visa',
+        'MC'  => 'MasterCard',
+        'DI'  => 'Discover',
         'JBC' => 'JBC',
         'CUP' => 'China Union Pay',
-        'MI' => 'Maestro',
+        'MI'  => 'Maestro',
     ];
 
     /**
