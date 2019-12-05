@@ -28,7 +28,7 @@ use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Shopgate\Import\Test\Integration\Model\Payment\BaseTest;
+use Shopgate\Import\Test\Integration\Model\Payment\Base;
 use ShopgateLibraryException;
 
 /**
@@ -36,12 +36,12 @@ use ShopgateLibraryException;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class CashOnDeliveryTest extends BaseTest
+class CashOnDeliveryTest extends Base
 {
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'COD',
-        'payment_group'  => 'COD',
+        'payment_group' => 'COD'
     ];
 
     /**
@@ -56,7 +56,7 @@ class CashOnDeliveryTest extends BaseTest
      *
      * @dataProvider         paidFlagProvider
      */
-    public function testPaymentMappingOnImport($isPaid): void
+    public function testPaymentMappingOnImport(int $isPaid): void
     {
         $result = $this->importClass->addOrder($this->getShopgateOrder($isPaid, static::ORDER_CONFIG));
         /** @var MagentoOrder $magentoOrder */
@@ -82,16 +82,5 @@ class CashOnDeliveryTest extends BaseTest
 
         $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
         $this->assertEquals('pending', $magentoOrder->getStatus());
-    }
-
-    /**
-     * @return int[]
-     */
-    public function paidFlagProvider(): array
-    {
-        return [
-            'Paid order'   => [1],
-            'Unpaid order' => [0],
-        ];
     }
 }

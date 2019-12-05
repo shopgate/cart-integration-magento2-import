@@ -127,38 +127,6 @@ abstract class AbstractPayment
     }
 
     /**
-     * @param string $const
-     * @param string $value
-     *
-     * @return string
-     * @throws ShopgateLibraryException
-     */
-    private function validate($const, $value): string
-    {
-        if (empty($value)) {
-            $this->throwValidateException($const);
-        }
-
-        return $value;
-    }
-
-    /**
-     * Throw a validate exception
-     *
-     * @param string $const
-     *
-     * @throws ShopgateLibraryException
-     */
-    private function throwValidateException(string $const): void
-    {
-        throw new ShopgateLibraryException(
-            ShopgateLibraryException::UNKNOWN_ERROR_CODE,
-            sprintf('Const not set \'%s\' in %s', $const, static::class),
-            true
-        );
-    }
-
-    /**
      * Checks if a payment method is enabled
      *
      * @return bool
@@ -166,9 +134,9 @@ abstract class AbstractPayment
      */
     public function isEnabled(): bool
     {
-        return (bool)$this->scopeConfig->getConfigByPath(
-            $this->validate('XML_CONFIG_ENABLED', static::XML_CONFIG_ENABLED)
-        )->getValue();
+        $path = $this->validate('XML_CONFIG_ENABLED', static::XML_CONFIG_ENABLED);
+
+        return (bool) $this->scopeConfig->getConfigByPath($path)->getValue();
     }
 
     /**
@@ -203,12 +171,12 @@ abstract class AbstractPayment
      *
      * @throws LocalizedException
      * @throws ShopgateLibraryException
+     * @noinspection PhpUnusedParameterInspection
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatus = $this->scopeConfig->getConfigByPath(
-            $this->validate('XML_CONFIG_ORDER_STATUS', static::XML_CONFIG_ORDER_STATUS)
-        )->getValue();
+        $path        = $this->validate('XML_CONFIG_ORDER_STATUS', static::XML_CONFIG_ORDER_STATUS);
+        $orderStatus = $this->scopeConfig->getConfigByPath($path)->getValue();
 
         $orderState = $this->utility->getStateForStatus($orderStatus);
         if ($orderState === MagentoOrder::STATE_HOLDED) {
@@ -228,19 +196,51 @@ abstract class AbstractPayment
      */
     public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
     {
-        return [
-            Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder,
-        ];
+        return [Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder];
     }
 
     /**
-     * An offline payment means that the payment code will be set to the quote before it is saved. The reason being is
-     * that unlike online payments, offline will not trigger capture when the quote is turned into an order.
+     * An offline payment means that the payment code will be
+     * set to the quote before it is saved. The reason being
+     * is that unlike online payments, offline will not trigger
+     * a capture call when the quote is turned into an order.
      *
      * @return bool
      */
     public function isOffline(): bool
     {
         return static::IS_OFFLINE;
+    }
+
+    /**
+     * @param string $const
+     * @param string $value
+     *
+     * @return string
+     * @throws ShopgateLibraryException
+     */
+    private function validate(string $const, string $value): string
+    {
+        if (empty($value)) {
+            $this->throwValidateException($const);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Throw a validate exception
+     *
+     * @param string $const
+     *
+     * @throws ShopgateLibraryException
+     */
+    private function throwValidateException(string $const): void
+    {
+        throw new ShopgateLibraryException(
+            ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+            sprintf('Const not set \'%s\' in %s', $const, static::class),
+            true
+        );
     }
 }

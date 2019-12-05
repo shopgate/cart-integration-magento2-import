@@ -25,24 +25,15 @@ declare(strict_types=1);
 namespace Shopgate\Import\Test\Integration\Model\Payment;
 
 use Exception;
-use Magento\Framework\Exception\InputException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Sales\Model\OrderRepository;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Shopgate\Base\Tests\Integration\SgDataManager;
 use Shopgate\Import\Model\Service\Import;
-use ShopgateLibraryException;
 use ShopgateOrder;
 
-/**
- * @magentoAppIsolation enabled
- * @magentoDbIsolation  enabled
- * @magentoAppArea      frontend
- */
-class BaseTest extends TestCase
+class Base extends TestCase
 {
     /** @var ObjectManager $objectManager */
     protected $objectManager;
@@ -75,24 +66,38 @@ class BaseTest extends TestCase
     public function getShopgateOrder(int $isPaid = 0, $config = []): ShopgateOrder
     {
         return new ShopgateOrder(
-            array_merge([
-                'order_number'               => random_int(1000000000, 9999999999),
-                'is_paid'                    => $isPaid,
-                'payment_time'               => null,
-                'payment_transaction_number' => (string)random_int(1000000000, 9999999999),
-                'mail'                       => 'shopgate@shopgate.com',
-                'amount_shop_payment'        => '5.00',
-                'amount_complete'            => '149.85',
-                'shipping_infos'             => ['amount' => '4.90'],
-                'invoice_address'            => $this->dataManager->getGermanAddress(),
-                'delivery_address'           => $this->dataManager->getGermanAddress(false),
-                'external_coupons'           => [],
-                'shopgate_coupons'           => [],
-                'items'                      => [$this->dataManager->getSimpleProduct()],
-                'payment_infos'              => [],
-                'payment_method'             => 'SHOPGATE',
-                'payment_group'              => 'SHOPGATE',
-            ], $config)
+            array_merge(
+                [
+                    'order_number'               => random_int(1000000000, 9999999999),
+                    'is_paid'                    => $isPaid,
+                    'payment_time'               => null,
+                    'payment_transaction_number' => (string) random_int(1000000000, 9999999999),
+                    'mail'                       => 'shopgate@shopgate.com',
+                    'amount_shop_payment'        => '5.00',
+                    'amount_complete'            => '149.85',
+                    'shipping_infos'             => ['amount' => '4.90'],
+                    'invoice_address'            => $this->dataManager->getGermanAddress(),
+                    'delivery_address'           => $this->dataManager->getGermanAddress(false),
+                    'external_coupons'           => [],
+                    'shopgate_coupons'           => [],
+                    'items'                      => [$this->dataManager->getSimpleProduct()],
+                    'payment_infos'              => [],
+                    'payment_method'             => 'SHOPGATE',
+                    'payment_group'              => 'SHOPGATE'
+                ],
+                $config
+            )
         );
+    }
+
+    /**
+     * @return int[]
+     */
+    public function paidFlagProvider(): array
+    {
+        return [
+            'Paid order'   => [1],
+            'Unpaid order' => [0],
+        ];
     }
 }

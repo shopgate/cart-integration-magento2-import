@@ -28,7 +28,7 @@ use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order as MagentoOrder;
-use Shopgate\Import\Test\Integration\Model\Payment\BaseTest;
+use Shopgate\Import\Test\Integration\Model\Payment\Base;
 use ShopgateLibraryException;
 
 /**
@@ -36,12 +36,12 @@ use ShopgateLibraryException;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class PrepaymentTest extends BaseTest
+class PrepaymentTest extends Base
 {
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'PREPAY',
-        'payment_group'  => 'PREPAY',
+        'payment_group' => 'PREPAY'
     ];
 
     /**
@@ -56,7 +56,7 @@ class PrepaymentTest extends BaseTest
      *
      * @dataProvider         paidFlagProvider
      */
-    public function testPaymentMappingOnImport($isPaid): void
+    public function testPaymentMappingOnImport(int $isPaid): void
     {
         $result = $this->importClass->addOrder($this->getShopgateOrder($isPaid, static::ORDER_CONFIG));
         /** @var MagentoOrder $magentoOrder */
@@ -82,16 +82,5 @@ class PrepaymentTest extends BaseTest
 
         $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
         $this->assertEquals('pending', $magentoOrder->getStatus());
-    }
-
-    /**
-     * @return array
-     */
-    public function paidFlagProvider(): array
-    {
-        return [
-            'Paid order'   => [1],
-            'Unpaid order' => [0],
-        ];
     }
 }
