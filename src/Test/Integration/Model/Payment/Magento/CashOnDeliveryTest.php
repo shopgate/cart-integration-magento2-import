@@ -41,7 +41,7 @@ class CashOnDeliveryTest extends Base
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'COD',
-        'payment_group' => 'COD'
+        'payment_group'  => 'COD'
     ];
 
     /**

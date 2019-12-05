@@ -41,7 +41,7 @@ class PrepaymentTest extends Base
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'PREPAY',
-        'payment_group' => 'PREPAY'
+        'payment_group'  => 'PREPAY'
     ];
 
     /**

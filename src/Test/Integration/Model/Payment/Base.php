@@ -97,7 +97,7 @@ class Base extends TestCase
     {
         return [
             'Paid order'   => [1],
-            'Unpaid order' => [0],
+            'Unpaid order' => [0]
         ];
     }
 }

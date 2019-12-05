@@ -82,7 +82,7 @@ class FactoryTest extends TestCase
             'Cash on delivery'                          => ['COD', 'cashondelivery'],
             'Invoice'                                   => ['INVOICE', 'checkmo'],
             'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
-            'Braintree PayPal' => ['BRAINTR_PP', 'braintree_paypal']
+            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal']
         ];
     }
 }

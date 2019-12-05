@@ -41,7 +41,7 @@ class InvoiceTest extends Base
     /** @var array */
     protected const ORDER_CONFIG = [
         'payment_method' => 'INVOICE',
-        'payment_group' => 'INVOICE'
+        'payment_group'  => 'INVOICE'
     ];
 
     /**
