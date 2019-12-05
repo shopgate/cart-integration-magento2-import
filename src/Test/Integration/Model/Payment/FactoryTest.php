@@ -29,6 +29,7 @@ use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Shopgate\Import\Model\Payment\Factory as PaymentFactory;
+use ShopgateLibraryException;
 
 /**
  * @magentoDbIsolation enabled
@@ -53,10 +54,10 @@ class FactoryTest extends TestCase
      * @param string $methodCode
      * @param string $expectedPaymentMethod
      *
-     * @dataProvider paymentMethodProvider
+     * @dataProvider         paymentMethodProvider
      *
      * @throws LocalizedException
-     * @throws \ShopgateLibraryException
+     * @throws ShopgateLibraryException
      *
      * @magentoConfigFixture current_store payment/braintree/active 1
      * @magentoConfigFixture current_store payment/braintree_paypal/active 1
@@ -81,7 +82,7 @@ class FactoryTest extends TestCase
             'Cash on delivery'                          => ['COD', 'cashondelivery'],
             'Invoice'                                   => ['INVOICE', 'checkmo'],
             'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
-            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal'],
+            'Braintree PayPal' => ['BRAINTR_PP', 'braintree_paypal']
         ];
     }
 }
