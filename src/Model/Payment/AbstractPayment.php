@@ -101,7 +101,9 @@ abstract class AbstractPayment
      */
     public function getPaymentModel(): ?MethodInterface
     {
-        return $this->isValid() ? $this->paymentHelper->getMethodInstance(static::PAYMENT_CODE) : null;
+        return $this->isValid()
+            ? $this->paymentHelper->getMethodInstance($this->validate('PAYMENT_CODE', static::PAYMENT_CODE))
+            : null;
     }
 
     /**
@@ -117,10 +119,43 @@ abstract class AbstractPayment
      * Check if the payment module is active
      *
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isModuleActive(): bool
     {
-        return $this->moduleManager->isEnabled(static::MODULE_NAME);
+        return $this->moduleManager->isEnabled($this->validate('MODULE_NAME', static::MODULE_NAME));
+    }
+
+    /**
+     * @param string $const
+     * @param string $value
+     *
+     * @return string
+     * @throws ShopgateLibraryException
+     */
+    private function validate($const, $value): string
+    {
+        if (empty($value)) {
+            $this->throwValidateException($const);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Throw a validate exception
+     *
+     * @param string $const
+     *
+     * @throws ShopgateLibraryException
+     */
+    private function throwValidateException(string $const): void
+    {
+        throw new ShopgateLibraryException(
+            ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+            sprintf('Const not set \'%s\' in %s', $const, static::class),
+            true
+        );
     }
 
     /**
@@ -131,46 +166,9 @@ abstract class AbstractPayment
      */
     public function isEnabled(): bool
     {
-        $this->validatePaymentSettings();
-
-        return (bool)$this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
-    }
-
-    /**
-     * Validate the payment settings
-     *
-     * @throws ShopgateLibraryException
-     */
-    private function validatePaymentSettings(): void
-    {
-        if (static::XML_CONFIG_ENABLED === '') {
-            $this->throwValidateException('No XML config enabled path set for payment');
-        }
-
-        if (static::XML_CONFIG_ORDER_STATUS === '') {
-            $this->throwValidateException('No XML config order status set for payment');
-        }
-
-        if (static::MODULE_NAME === '') {
-            $this->throwValidateException('No module name set for payment');
-        }
-
-        if (static::PAYMENT_CODE === '') {
-            $this->throwValidateException('No payment code set for payment');
-        }
-    }
-
-    /**
-     * Throw a validate exception
-     *
-     * @param $message
-     *
-     * @throws ShopgateLibraryException
-     */
-    private function throwValidateException($message): void
-    {
-        throw new ShopgateLibraryException(ShopgateLibraryException::UNKNOWN_ERROR_CODE,
-            sprintf('%s (%s)', $message, static::class), true);
+        return (bool)$this->scopeConfig->getConfigByPath(
+            $this->validate('XML_CONFIG_ENABLED', static::XML_CONFIG_ENABLED)
+        )->getValue();
     }
 
     /**
@@ -204,11 +202,15 @@ abstract class AbstractPayment
      * @param ShopgateOrder $shopgateOrder
      *
      * @throws LocalizedException
+     * @throws ShopgateLibraryException
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatus = $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ORDER_STATUS)->getValue();
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
+        $orderStatus = $this->scopeConfig->getConfigByPath(
+            $this->validate('XML_CONFIG_ORDER_STATUS', static::XML_CONFIG_ORDER_STATUS)
+        )->getValue();
+
+        $orderState = $this->utility->getStateForStatus($orderStatus);
         if ($orderState === MagentoOrder::STATE_HOLDED) {
             if ($magentoOrder->canHold()) {
                 $magentoOrder->hold();
@@ -227,7 +229,7 @@ abstract class AbstractPayment
     public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
     {
         return [
-            Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder
+            Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder,
         ];
     }
 

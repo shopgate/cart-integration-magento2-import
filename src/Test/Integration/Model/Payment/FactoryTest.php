@@ -82,9 +82,6 @@ class FactoryTest extends TestCase
             'Invoice'                                   => ['INVOICE', 'checkmo'],
             'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
             'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal'],
-            'return shopgate as default payment method' => ['PREPAY', 'shopgate'],
-            'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
-            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal'],
         ];
     }
 }
