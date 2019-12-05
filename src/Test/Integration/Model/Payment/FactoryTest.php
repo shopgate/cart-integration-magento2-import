@@ -61,6 +61,9 @@ class FactoryTest extends TestCase
      *
      * @magentoConfigFixture current_store payment/braintree/active 1
      * @magentoConfigFixture current_store payment/braintree_paypal/active 1
+     * @magentoConfigFixture current_store payment/cashondelivery/active 1
+     * @magentoConfigFixture current_store payment/checkmo/active 1
+     * @magentoConfigFixture current_store payment/banktransfer/active 1
      */
     public function testPaymentMethodMapping($methodCode, $expectedPaymentMethod): void
     {
@@ -82,7 +85,7 @@ class FactoryTest extends TestCase
             'Cash on delivery'                          => ['COD', 'cashondelivery'],
             'Invoice'                                   => ['INVOICE', 'checkmo'],
             'Braintree Credit Card'                     => ['BRAINTR_CC', 'braintree'],
-            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal']
+            'Braintree PayPal'                          => ['BRAINTR_PP', 'braintree_paypal'],
         ];
     }
 }
