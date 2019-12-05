@@ -156,7 +156,7 @@ class Quote extends \Shopgate\Base\Helper\Quote
      * quote turns into an order. We manipulate the online payment method after the order is created.
      *
      * @throws LocalizedException
-     * @throws \ShopgateLibraryException
+     * @throws ShopgateLibraryException
      */
     protected function setPayment()
     {
