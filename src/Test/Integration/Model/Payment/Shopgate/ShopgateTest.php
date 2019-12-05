@@ -38,7 +38,7 @@ use ShopgateLibraryException;
  */
 class ShopgateTest extends BaseTest
 {
-    /** @var array */
+    /** @var string[] */
     protected const ORDER_CONFIG = [
         'payment_method' => 'SHOPGATE',
         'payment_group'  => 'SHOPGATE',
