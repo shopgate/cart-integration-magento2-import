@@ -33,6 +33,7 @@ use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Payment\Shopgate;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
+use ShopgateLibraryException;
 
 abstract class AbstractPayment
 {
@@ -52,6 +53,10 @@ abstract class AbstractPayment
      * The code of the magento payment method
      */
     protected const PAYMENT_CODE = '';
+    /**
+     * Map payment method on quote
+     */
+    protected const IS_OFFLINE = true;
 
     /** @var CoreInterface */
     protected $scopeConfig;
@@ -92,14 +97,18 @@ abstract class AbstractPayment
      *
      * @return MethodInterface|null
      * @throws LocalizedException
+     * @throws ShopgateLibraryException
      */
     public function getPaymentModel(): ?MethodInterface
     {
-        return $this->isValid() ? $this->paymentHelper->getMethodInstance(static::PAYMENT_CODE) : null;
+        return $this->isValid()
+            ? $this->paymentHelper->getMethodInstance($this->validate('PAYMENT_CODE', static::PAYMENT_CODE))
+            : null;
     }
 
     /**
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isValid(): bool
     {
@@ -110,20 +119,26 @@ abstract class AbstractPayment
      * Check if the payment module is active
      *
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isModuleActive(): bool
     {
-        return $this->moduleManager->isEnabled(static::MODULE_NAME);
+        $moduleName = $this->validate('MODULE_NAME', static::MODULE_NAME);
+
+        return $this->moduleManager->isEnabled($moduleName);
     }
 
     /**
      * Checks if a payment method is enabled
      *
      * @return bool
+     * @throws ShopgateLibraryException
      */
     public function isEnabled(): bool
     {
-        return (bool) $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ENABLED)->getValue();
+        $path = $this->validate('XML_CONFIG_ENABLED', static::XML_CONFIG_ENABLED);
+
+        return (bool) $this->scopeConfig->getConfigByPath($path)->getValue();
     }
 
     /**
@@ -157,11 +172,15 @@ abstract class AbstractPayment
      * @param ShopgateOrder $shopgateOrder
      *
      * @throws LocalizedException
+     * @throws ShopgateLibraryException
+     * @noinspection PhpUnusedParameterInspection
      */
     public function setOrderStatus(MagentoOrder $magentoOrder, ShopgateOrder $shopgateOrder): void
     {
-        $orderStatus = $this->scopeConfig->getConfigByPath(static::XML_CONFIG_ORDER_STATUS)->getValue();
-        $orderState  = $this->utility->getStateForStatus($orderStatus);
+        $path        = $this->validate('XML_CONFIG_ORDER_STATUS', static::XML_CONFIG_ORDER_STATUS);
+        $orderStatus = $this->scopeConfig->getConfigByPath($path)->getValue();
+
+        $orderState = $this->utility->getStateForStatus($orderStatus);
         if ($orderState === MagentoOrder::STATE_HOLDED) {
             if ($magentoOrder->canHold()) {
                 $magentoOrder->hold();
@@ -179,8 +198,51 @@ abstract class AbstractPayment
      */
     public function getAdditionalPaymentData(ShopgateOrder $shopgateOrder): array
     {
-        return [
-            Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder
-        ];
+        return [Shopgate::SG_DATA_OBJECT_KEY => $shopgateOrder];
+    }
+
+    /**
+     * An offline payment means that the payment code will be
+     * set to the quote before it is saved. The reason being
+     * is that unlike online payments, offline will not trigger
+     * a capture call when the quote is turned into an order.
+     *
+     * @return bool
+     */
+    public function isOffline(): bool
+    {
+        return static::IS_OFFLINE;
+    }
+
+    /**
+     * @param string $const
+     * @param string $value
+     *
+     * @return string
+     * @throws ShopgateLibraryException
+     */
+    private function validate(string $const, string $value): string
+    {
+        if (empty($value)) {
+            $this->throwValidateException($const);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Throw a validate exception
+     *
+     * @param string $const
+     *
+     * @throws ShopgateLibraryException
+     */
+    private function throwValidateException(string $const): void
+    {
+        throw new ShopgateLibraryException(
+            ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+            sprintf('Const not set \'%s\' in %s', $const, static::class),
+            true
+        );
     }
 }
