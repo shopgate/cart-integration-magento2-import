@@ -123,7 +123,9 @@ abstract class AbstractPayment
      */
     public function isModuleActive(): bool
     {
-        return $this->moduleManager->isEnabled($this->validate('MODULE_NAME', static::MODULE_NAME));
+        $moduleName = $this->validate('MODULE_NAME', static::MODULE_NAME);
+
+        return $this->moduleManager->isEnabled($moduleName);
     }
 
     /**
