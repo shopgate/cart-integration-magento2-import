@@ -47,6 +47,9 @@ use ShopgateOrder;
  */
 class CreditCardTest extends TestCase
 {
+    /** @var string */
+    protected const PAYMENT_TITLE = 'Credit card (Braintree)';
+
     /** @var ObjectManager $objectManager */
     private $objectManager;
     /** @var Import */
@@ -101,6 +104,10 @@ class CreditCardTest extends TestCase
 
         $this->assertEquals(0, $authorisationTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $authorisationTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**
@@ -132,6 +139,10 @@ class CreditCardTest extends TestCase
         $this->assertFalse($authorisationTransaction);
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**
@@ -163,6 +174,10 @@ class CreditCardTest extends TestCase
 
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**

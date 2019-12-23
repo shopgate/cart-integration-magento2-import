@@ -48,6 +48,9 @@ use ShopgateOrder;
  */
 class PayPalTest extends TestCase
 {
+    /** @var string */
+    protected const PAYMENT_TITLE = 'PayPal (Braintree)';
+
     /** @var ObjectManager $objectManager */
     private $objectManager;
     /** @var Import */
@@ -93,6 +96,10 @@ class PayPalTest extends TestCase
         $this->assertTrue($magentoOrder->getPayment()->canCapture());
 
         $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_AUTH);
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**
@@ -147,6 +154,10 @@ class PayPalTest extends TestCase
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getLastTransId());
 
         $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_CAPTURE);
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**
@@ -170,6 +181,10 @@ class PayPalTest extends TestCase
         $this->assertEquals(PayPal::TRANSACTION_ID, $magentoOrder->getPayment()->getLastTransId());
 
         $this->validateTransaction((string) $magentoOrder->getPayment()->getEntityId(), Transaction::TYPE_CAPTURE);
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
     }
 
     /**
