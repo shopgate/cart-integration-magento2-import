@@ -31,9 +31,11 @@ class CreditCard
     /**
      * Outsourced into a function for re-use
      *
+     * @param string|null $cartType
+     *
      * @return array
      */
-    public static function getAdditionalPayment(): array
+    public static function getAdditionalPayment($cartType = null): array
     {
         return [
             'shopgate_payment_name'   => 'Credit card (Braintree)',
@@ -47,7 +49,7 @@ class CreditCard
             'credit_card'             => [
                 'holder'        => 'Testi Test',
                 'masked_number' => '************9596',
-                'type'          => 'mastercard',
+                'type'          => $cartType,
                 'expiry_year'   => 2021,
                 'expiry_month'  => 2,
             ]
