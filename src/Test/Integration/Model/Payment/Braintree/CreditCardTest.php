@@ -51,6 +51,8 @@ class CreditCardTest extends TestCase
     protected const PAYMENT_TITLE = 'Credit card (Braintree)';
     /** @var string */
     protected const CC_TYPE = 'MC';
+    /** @var string */
+    protected const AI_CC_TYPE = 'MasterCard';
 
     /** @var ObjectManager $objectManager */
     private $objectManager;
@@ -110,6 +112,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
         $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
@@ -146,6 +149,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
         $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
@@ -182,6 +186,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
         $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
