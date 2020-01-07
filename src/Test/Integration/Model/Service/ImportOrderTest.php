@@ -189,7 +189,7 @@ class ImportOrderTest extends TestCase
                 CreditCard::getAdditionalPayment('jcb'),
                 'BRAINTR_CC',
                 'CC',
-                'JBC'
+                'JCB'
             ],
             'Braintree Credit Card - unionpay'     => [
                 'braintree',
