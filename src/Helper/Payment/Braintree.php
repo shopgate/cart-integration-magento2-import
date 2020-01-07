@@ -31,7 +31,7 @@ use Magento\Braintree\Model\Adminhtml\Source\CcType;
 class Braintree
 {
     /** @var CcType */
-    protected $ccType;
+    private $ccType;
 
     /**
      * @param CcType $ccType

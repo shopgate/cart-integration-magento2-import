@@ -49,6 +49,8 @@ class CreditCardTest extends TestCase
 {
     /** @var string */
     protected const PAYMENT_TITLE = 'Credit card (Braintree)';
+    /** @var string */
+    protected const CC_TYPE = 'MC';
 
     /** @var ObjectManager $objectManager */
     private $objectManager;
@@ -108,6 +110,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
@@ -143,6 +146,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
@@ -178,6 +182,7 @@ class CreditCardTest extends TestCase
         /** AdditionalInformation */
         $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
         $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
@@ -204,7 +209,7 @@ class CreditCardTest extends TestCase
                 'external_coupons'           => [],
                 'shopgate_coupons'           => [],
                 'items'                      => [$this->dataManager->getSimpleProduct()],
-                'payment_infos'              => CreditCard::getAdditionalPayment(),
+                'payment_infos'              => CreditCard::getAdditionalPayment('mastercard'),
                 'payment_method'             => 'BRAINTR_CC',
                 'payment_group'              => 'CC'
             ]
