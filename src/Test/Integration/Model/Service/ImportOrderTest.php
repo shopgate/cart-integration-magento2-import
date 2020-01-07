@@ -110,7 +110,7 @@ class ImportOrderTest extends TestCase
         array $paymentInformation,
         string $paymentMethod,
         string $paymentGroup,
-        string $cartType
+        $cartType
     ): void {
         $shopgateOrder = new \ShopgateOrder(
             [
