@@ -43,13 +43,14 @@ class CreditCard extends Base
     protected const  PAYMENT_CODE         = 'braintree';
     protected const  XML_CONFIG_ENABLED   = 'payment/braintree/active';
     private const    CREDIT_CARD_TYPE_MAP = [
-        'visa'       => 'VI',
-        'maestro'    => 'MI',
-        'mastercard' => 'MC',
-        'discover'   => 'DI',
-        'amex'       => 'AE',
-        'jcb'        => 'JCB',
-        'unionpay'   => 'CUP',
+        'visa'             => 'VI',
+        'maestro'          => 'MI',
+        'mastercard'       => 'MC',
+        'discover'         => 'DI',
+        'amex'             => 'AE',
+        'jcb'              => 'JCB',
+        'unionpay'         => 'CUP',
+        'american_express' => 'AE',
     ];
 
     /** @var PaymentTokenFactoryInterface */
