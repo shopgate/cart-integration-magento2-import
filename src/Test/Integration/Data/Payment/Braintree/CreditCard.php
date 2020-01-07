@@ -35,7 +35,7 @@ class CreditCard
      *
      * @return array
      */
-    public static function getAdditionalPayment($cartType = null): array
+    public static function getAdditionalPayment(string $cartType = null): array
     {
         return [
             'shopgate_payment_name'   => 'Credit card (Braintree)',
