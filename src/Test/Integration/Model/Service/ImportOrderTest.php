@@ -91,10 +91,10 @@ class ImportOrderTest extends TestCase
     }
 
     /**
-     * @param string $expectedPaymentCode
-     * @param array  $paymentInformation
-     * @param string $paymentMethod
-     * @param string $paymentGroup
+     * @param string      $expectedPaymentCode
+     * @param array       $paymentInformation
+     * @param string      $paymentMethod
+     * @param string      $paymentGroup
      * @param string|null $cartType
      *
      * @throws Exception
