@@ -95,7 +95,7 @@ class Braintree
     {
         $mapping = $this->ccType->getCcTypeLabelMap();
 
-        return array_key_exists($ccType, $mapping) ? $mapping[$ccType] : $ccType;
+        return $mapping[$ccType] ?? $ccType;
     }
 
     /**
