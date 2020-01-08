@@ -36,6 +36,7 @@ use Shopgate\Base\Api\Config\CoreInterface;
 use Shopgate\Base\Model\Shopgate\Extended\Base as ShopgateOrder;
 use Shopgate\Import\Helper\Order\Utility;
 use Shopgate\Import\Helper\Payment\Braintree as Helper;
+use ShopgateLibraryException;
 
 class CreditCard extends Base
 {
