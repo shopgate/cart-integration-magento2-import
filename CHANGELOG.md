@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
 - Mapping for Braintree PayPal payment method
+- Mapping for Braintree (Gene) PayPal payment method
+- Mapping for Braintree (Gene) Credit Card payment method
 
 ## [2.9.13] - 2019-11-26
 ### Changed
