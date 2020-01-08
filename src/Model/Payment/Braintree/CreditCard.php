@@ -187,9 +187,19 @@ class CreditCard extends Base
      * @param string $ccType
      *
      * @return string
+     *
+     * @throws ShopgateLibraryException
      */
     private function getMappedCCType(string $ccType): string
     {
-        return static::CREDIT_CARD_TYPE_MAP[$ccType];
+        if (isset(static::CREDIT_CARD_TYPE_MAP[$ccType])) {
+            return static::CREDIT_CARD_TYPE_MAP[$ccType];
+        };
+
+        throw new ShopgateLibraryException(
+            ShopgateLibraryException::UNKNOWN_ERROR_CODE,
+            sprintf('Unknown Braintree CC Type: ' . $ccType),
+            true
+        );
     }
 }
