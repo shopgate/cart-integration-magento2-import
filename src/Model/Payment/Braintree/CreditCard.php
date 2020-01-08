@@ -194,7 +194,7 @@ class CreditCard extends Base
     {
         if (isset(static::CREDIT_CARD_TYPE_MAP[$ccType])) {
             return static::CREDIT_CARD_TYPE_MAP[$ccType];
-        };
+        }
 
         throw new ShopgateLibraryException(
             ShopgateLibraryException::UNKNOWN_ERROR_CODE,
