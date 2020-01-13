@@ -20,6 +20,8 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
+declare(strict_types=1);
+
 namespace Shopgate\Import\Test\Integration\Model\Payment\Braintree;
 
 use Exception;
@@ -45,6 +47,13 @@ use ShopgateOrder;
  */
 class CreditCardTest extends TestCase
 {
+    /** @var string */
+    protected const PAYMENT_TITLE = 'Credit card (Braintree)';
+    /** @var string */
+    protected const CC_TYPE = 'MC';
+    /** @var string */
+    protected const AI_CC_TYPE = 'MasterCard';
+
     /** @var ObjectManager $objectManager */
     private $objectManager;
     /** @var Import */
@@ -99,6 +108,12 @@ class CreditCardTest extends TestCase
 
         $this->assertEquals(0, $authorisationTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $authorisationTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
@@ -130,11 +145,17 @@ class CreditCardTest extends TestCase
         $this->assertFalse($authorisationTransaction);
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
      * @magentoConfigFixture current_store payment/braintree/active 1
-     * @magentoConfigFixture current_store payment/braintree/payment_action capture
+     * @magentoConfigFixture current_store payment/braintree/payment_action authorize_capture
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -161,6 +182,12 @@ class CreditCardTest extends TestCase
 
         $this->assertEquals(0, $captureTransaction->getIsClosed());
         $this->assertEquals(CreditCard::TRANSACTION_ID, $captureTransaction->getData('txn_id'));
+
+        /** AdditionalInformation */
+        $additionalInformation = $magentoOrder->getPayment()->getAdditionalInformation();
+        $this->assertEquals(static::PAYMENT_TITLE, $additionalInformation['method_title']);
+        $this->assertEquals(static::AI_CC_TYPE, $additionalInformation['cc_type']);
+        $this->assertEquals(static::CC_TYPE, $magentoOrder->getPayment()->getCcType());
     }
 
     /**
@@ -187,7 +214,7 @@ class CreditCardTest extends TestCase
                 'external_coupons'           => [],
                 'shopgate_coupons'           => [],
                 'items'                      => [$this->dataManager->getSimpleProduct()],
-                'payment_infos'              => CreditCard::getAdditionalPayment(),
+                'payment_infos'              => CreditCard::getAdditionalPayment('mastercard'),
                 'payment_method'             => 'BRAINTR_CC',
                 'payment_group'              => 'CC'
             ]

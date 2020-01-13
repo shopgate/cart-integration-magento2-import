@@ -26,10 +26,21 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use Magento\Braintree\Model\InstantPurchase\CreditCard\TokenFormatter;
+use Magento\Braintree\Model\Adminhtml\Source\CcType;
 
 class Braintree
 {
+    /** @var CcType */
+    private $ccType;
+
+    /**
+     * @param CcType $ccType
+     */
+    public function __construct(CcType $ccType)
+    {
+        $this->ccType = $ccType;
+    }
+
     /**
      * @param string $expirationYear
      * @param string $expirationMonth
@@ -82,7 +93,9 @@ class Braintree
      */
     public function formatVisibleCCType(string $ccType): string
     {
-        return TokenFormatter::$baseCardTypes[$ccType] ?? $ccType;
+        $mapping = $this->ccType->getCcTypeLabelMap();
+
+        return $mapping[$ccType] ?? $ccType;
     }
 
     /**

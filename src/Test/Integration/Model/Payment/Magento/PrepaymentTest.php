@@ -36,16 +36,16 @@ use ShopgateLibraryException;
  * @magentoDbIsolation  enabled
  * @magentoAppArea      frontend
  */
-class ShopgateTest extends Base
+class PrepaymentTest extends Base
 {
-    /** @var string[] */
+    /** @var array */
     protected const ORDER_CONFIG = [
-        'payment_method' => 'SHOPGATE',
-        'payment_group'  => 'SHOPGATE'
+        'payment_method' => 'PREPAY',
+        'payment_group'  => 'PREPAY'
     ];
 
     /**
-     * @magentoConfigFixture current_store payment/shopgate/order_status processing
+     * @magentoConfigFixture current_store payment/banktransfer/active 1
      *
      * @param int $isPaid
      *
@@ -62,7 +62,25 @@ class ShopgateTest extends Base
         /** @var MagentoOrder $magentoOrder */
         $magentoOrder = $this->orderRepository->get($result['external_order_id']);
 
+        $this->assertEquals('banktransfer', $magentoOrder->getPayment()->getMethod());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
+    }
+
+    /**
+     * @magentoConfigFixture current_store payment/banktransfer/active 0
+     *
+     * @throws Exception
+     * @throws ShopgateLibraryException
+     * @throws InputException
+     * @throws NoSuchEntityException
+     */
+    public function testInactivePaymentMappingOnImport(): void
+    {
+        $result = $this->importClass->addOrder($this->getShopgateOrder(0, static::ORDER_CONFIG));
+        /** @var MagentoOrder $magentoOrder */
+        $magentoOrder = $this->orderRepository->get($result['external_order_id']);
+
         $this->assertEquals('shopgate', $magentoOrder->getPayment()->getMethod());
-        $this->assertEquals('processing', $magentoOrder->getStatus());
+        $this->assertEquals('pending', $magentoOrder->getStatus());
     }
 }

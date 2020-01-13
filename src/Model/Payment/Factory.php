@@ -43,6 +43,7 @@ class Factory
      * @param string $paymentMethod
      *
      * @return AbstractPayment
+     * @throws \ShopgateLibraryException
      */
     public function getPayment(string $paymentMethod): AbstractPayment
     {
