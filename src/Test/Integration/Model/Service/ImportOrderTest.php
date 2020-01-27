@@ -91,10 +91,11 @@ class ImportOrderTest extends TestCase
     }
 
     /**
-     * @param string $expectedPaymentCode
-     * @param array  $paymentInformation
-     * @param string $paymentMethod
-     * @param string $paymentGroup
+     * @param string      $expectedPaymentCode
+     * @param array       $paymentInformation
+     * @param string      $paymentMethod
+     * @param string      $paymentGroup
+     * @param string|null $cartType
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -108,7 +109,8 @@ class ImportOrderTest extends TestCase
         string $expectedPaymentCode,
         array $paymentInformation,
         string $paymentMethod,
-        string $paymentGroup
+        string $paymentGroup,
+        $cartType
     ): void {
         $shopgateOrder = new \ShopgateOrder(
             [
@@ -138,6 +140,7 @@ class ImportOrderTest extends TestCase
         $order = $sgOrder->loadMethods([]);
 
         $this->assertEquals($expectedPaymentCode, $order->getPayment()->getMethod());
+        $this->assertEquals($cartType, $order->getPayment()->getCcType());
     }
 
     /**
@@ -148,9 +151,59 @@ class ImportOrderTest extends TestCase
         return [
             'Braintree Credit Card'     => [
                 'braintree',
-                CreditCard::getAdditionalPayment(),
+                CreditCard::getAdditionalPayment('visa'),
                 'BRAINTR_CC',
-                'CC'
+                'CC',
+                'VI'
+            ],
+            'Braintree Credit Card - maestro'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('maestro'),
+                'BRAINTR_CC',
+                'CC',
+                'MI'
+            ],
+            'Braintree Credit Card - mastercard'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('mastercard'),
+                'BRAINTR_CC',
+                'CC',
+                'MC'
+            ],
+            'Braintree Credit Card - discover'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('discover'),
+                'BRAINTR_CC',
+                'CC',
+                'DI'
+            ],
+            'Braintree Credit Card - amex'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('amex'),
+                'BRAINTR_CC',
+                'CC',
+                'AE'
+            ],
+            'Braintree Credit Card - jcb'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('jcb'),
+                'BRAINTR_CC',
+                'CC',
+                'JCB'
+            ],
+            'Braintree Credit Card - unionpay'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('unionpay'),
+                'BRAINTR_CC',
+                'CC',
+                'CUP'
+            ],
+            'Braintree Credit Card - american_express'     => [
+                'braintree',
+                CreditCard::getAdditionalPayment('american_express'),
+                'BRAINTR_CC',
+                'CC',
+                'AE'
             ],
             'Not mapped payment method' => [
                 'shopgate',
@@ -159,7 +212,8 @@ class ImportOrderTest extends TestCase
                     'status'                => 'authorized'
                 ],
                 'SOMETHING_UNKNOWN',
-                'NEW'
+                'NEW',
+                null
             ]
         ];
     }
