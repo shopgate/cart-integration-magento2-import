@@ -183,6 +183,8 @@ class Order
         $quote = $this->quote->load($this->quoteMethods);
         $quote->setData('totals_collected_flag', false);
         $quote->collectTotals();
+        $quote->getShippingAddress()->setData('should_ignore_validation', true);
+        $quote->getBillingAddress()->setData('should_ignore_validation', true);
 
         $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
         $order = $this->quoteManagement->submit($quote);

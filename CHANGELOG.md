@@ -5,12 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-## [2.9.14] - 2020-01-13
-### Added
-- Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
-- Mapping for Braintree PayPal payment method
-- Mapping for Braintree (Gene) PayPal payment method
-- Mapping for Braintree (Gene) Credit Card payment method
+### Fixed
+- errors for missing regions during order import
 
 ## [2.9.13] - 2019-11-26
 ### Changed
@@ -79,8 +75,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.14...HEAD
-[2.9.14]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.13...2.9.14
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.13...HEAD
 [2.9.13]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.12...2.9.13
 [2.9.12]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.11...2.9.12
 [2.9.11]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.10...2.9.11

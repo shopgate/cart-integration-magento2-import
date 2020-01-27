@@ -91,11 +91,10 @@ class ImportOrderTest extends TestCase
     }
 
     /**
-     * @param string      $expectedPaymentCode
-     * @param array       $paymentInformation
-     * @param string      $paymentMethod
-     * @param string      $paymentGroup
-     * @param string|null $cartType
+     * @param string $expectedPaymentCode
+     * @param array  $paymentInformation
+     * @param string $paymentMethod
+     * @param string $paymentGroup
      *
      * @throws Exception
      * @throws ShopgateLibraryException
@@ -109,8 +108,7 @@ class ImportOrderTest extends TestCase
         string $expectedPaymentCode,
         array $paymentInformation,
         string $paymentMethod,
-        string $paymentGroup,
-        $cartType
+        string $paymentGroup
     ): void {
         $shopgateOrder = new \ShopgateOrder(
             [
@@ -140,7 +138,6 @@ class ImportOrderTest extends TestCase
         $order = $sgOrder->loadMethods([]);
 
         $this->assertEquals($expectedPaymentCode, $order->getPayment()->getMethod());
-        $this->assertEquals($cartType, $order->getPayment()->getCcType());
     }
 
     /**
@@ -149,61 +146,11 @@ class ImportOrderTest extends TestCase
     public function paymentDataProvider(): array
     {
         return [
-            'Braintree Credit Card - visa'     => [
+            'Braintree Credit Card'     => [
                 'braintree',
-                CreditCard::getAdditionalPayment('visa'),
+                CreditCard::getAdditionalPayment(),
                 'BRAINTR_CC',
-                'CC',
-                'VI'
-            ],
-            'Braintree Credit Card - maestro'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('maestro'),
-                'BRAINTR_CC',
-                'CC',
-                'MI'
-            ],
-            'Braintree Credit Card - mastercard'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('mastercard'),
-                'BRAINTR_CC',
-                'CC',
-                'MC'
-            ],
-            'Braintree Credit Card - discover'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('discover'),
-                'BRAINTR_CC',
-                'CC',
-                'DI'
-            ],
-            'Braintree Credit Card - amex'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('amex'),
-                'BRAINTR_CC',
-                'CC',
-                'AE'
-            ],
-            'Braintree Credit Card - jcb'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('jcb'),
-                'BRAINTR_CC',
-                'CC',
-                'JCB'
-            ],
-            'Braintree Credit Card - unionpay'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('unionpay'),
-                'BRAINTR_CC',
-                'CC',
-                'CUP'
-            ],
-            'Braintree Credit Card - american_express'     => [
-                'braintree',
-                CreditCard::getAdditionalPayment('american_express'),
-                'BRAINTR_CC',
-                'CC',
-                'AE'
+                'CC'
             ],
             'Not mapped payment method' => [
                 'shopgate',
@@ -212,9 +159,69 @@ class ImportOrderTest extends TestCase
                     'status'                => 'authorized'
                 ],
                 'SOMETHING_UNKNOWN',
-                'NEW',
-                null
+                'NEW'
             ]
+        ];
+    }
+
+    /**
+     * @param string $expectedState
+     * @param string $country
+     * @param string $state
+     *
+     * @dataProvider regionProvider
+     * @throws ShopgateLibraryException
+     *
+     * @magentoConfigFixture default/general/region/state_required BZ
+     */
+    public function testRequiredStates($expectedState, $country, $state): void
+    {
+        $invoiceAddress            = $this->dataManager->getGermanAddress();
+        $invoiceAddress['country'] = $country;
+        $invoiceAddress['state']   = $state;
+        $billingAddress            = $this->dataManager->getGermanAddress(false);
+        $billingAddress['country'] = $country;
+        $billingAddress['state']   = $state;
+
+        $shopgateOrder = new \ShopgateOrder(
+            [
+                'order_number'               => random_int(1000000000, 9999999999),
+                'is_paid'                    => 1,
+                'payment_time'               => null,
+                'payment_transaction_number' => '8654415',
+                'mail'                       => 'shopgate@shopgate.com',
+                'amount_shop_payment'        => '5.00',
+                'amount_complete'            => '149.85',
+                'shipping_infos'             => ['amount' => '4.90'],
+                'invoice_address'            => $invoiceAddress,
+                'delivery_address'           => $billingAddress,
+                'external_coupons'           => [],
+                'shopgate_coupons'           => [],
+                'items'                      => [$this->dataManager->getSimpleProduct()],
+                'payment_method'             => 'COD',
+                'payment_group'              => 'COD'
+            ]
+        );
+
+        $this->orderHolder[] = $this->importClass->addOrder($shopgateOrder);
+        /** @var ShopgateOrder $sgOrder */
+        $sgOrder = Bootstrap::getObjectManager()->get(ShopgateOrder::class);
+        /** @var MageOrder $order */
+        $order = $sgOrder->loadMethods([]);
+
+        $this->assertEquals($expectedState, $order->getShippingAddress()->getRegion());
+    }
+
+    /**
+     * @return array
+     */
+    public function regionProvider(): array
+    {
+        return [
+            'Mapped region'                      => ['Sachsen-Anhalt', 'DE', 'DE-ST'],
+            'Not a mapped region'                => ['TOL', 'BZ', 'BZ-TOL'],
+            'No region required'                 => ['', 'DE', ''],
+            'Should not fail, although required' => ['', 'BZ', ''],
         ];
     }
 
