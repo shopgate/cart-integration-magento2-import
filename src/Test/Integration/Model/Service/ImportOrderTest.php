@@ -149,7 +149,7 @@ class ImportOrderTest extends TestCase
     public function paymentDataProvider(): array
     {
         return [
-            'Braintree Credit Card'     => [
+            'Braintree Credit Card - visa'     => [
                 'braintree',
                 CreditCard::getAdditionalPayment('visa'),
                 'BRAINTR_CC',
