@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Removed
 - Dependency to magento/module-braintree
+### Fixed
+- errors for missing regions during order import
 
 ## [2.9.14] - 2020-01-13
 ### Added
