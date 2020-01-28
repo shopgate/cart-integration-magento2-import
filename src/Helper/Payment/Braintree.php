@@ -26,20 +26,29 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use Magento\Braintree\Model\Adminhtml\Source\CcType;
 
 class Braintree
 {
-    /** @var CcType */
-    private $ccType;
-
     /**
-     * @param CcType $ccType
+     * Supported credit card types
      */
-    public function __construct(CcType $ccType)
-    {
-        $this->ccType = $ccType;
-    }
+    public const CARD_TYPES = [
+        'CUP' => 'China Union Pay',
+        'AE'  => 'American Express',
+        'VI'  => 'Visa',
+        'MC'  => 'MasterCard',
+        'DI'  => 'Discover',
+        'JCB' => 'JCB',
+        'SM'  => 'Switch/Maestro',
+        'DN'  => 'Diners',
+        'SO'  => 'Solo',
+        'MI'  => 'Maestro International',
+        'MD'  => 'Maestro Domestic',
+        'HC'  => 'Hipercard',
+        'ELO' => 'Elo',
+        'AU'  => 'Aura',
+        'OT'  => 'Other',
+    ];
 
     /**
      * @param string $expirationYear
@@ -93,9 +102,7 @@ class Braintree
      */
     public function formatVisibleCCType(string $ccType): string
     {
-        $mapping = $this->ccType->getCcTypeLabelMap();
-
-        return $mapping[$ccType] ?? $ccType;
+        return self::CARD_TYPES[$ccType] ?? $ccType;
     }
 
     /**
