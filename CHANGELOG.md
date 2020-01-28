@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Removed
+- Dependency to magento/module-braintree
+
 ## [2.9.14] - 2020-01-13
 ### Added
 - Mapping for Magento default Cash on Delivery, Invoice and Prepayment payment method
