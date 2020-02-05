@@ -3,7 +3,7 @@
   "description": "Shopgate import module for Magento 2, handles all import functionality",
   "license": "Apache-2.0",
   "type": "magento2-module",
-  "version": "2.9.14",
+  "version": "2.9.15",
   "authors": [
     {
       "name": "Konstantin Kiritsenko"
@@ -24,6 +24,9 @@
   "require": {
     "php": ">=7.1",
     "shopgate/cart-integration-magento2-base": "~2.9.14"
+  },
+  "require-dev": {
+    "magento/module-braintree": "^100.3"
   },
   "autoload": {
     "files": [
