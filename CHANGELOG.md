@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [2.9.15] - 2020-02-05
 ### Removed
 - Dependency to magento/module-braintree
 ### Fixed
@@ -84,7 +85,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.14...HEAD
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.15...HEAD
+[2.9.15]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.14...2.9.15
 [2.9.14]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.13...2.9.14
 [2.9.13]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.12...2.9.13
 [2.9.12]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.11...2.9.12
