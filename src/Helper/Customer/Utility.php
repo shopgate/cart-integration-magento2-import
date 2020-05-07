@@ -38,8 +38,6 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
 {
     /** @var AddressFactory */
     private $addressFactory;
-    /** @var CustomerHelper */
-    private $customerHelper;
 
     /**
      * @param GroupCollection    $customerGroupCollection
@@ -58,8 +56,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
         Regions $regions
     ) {
         $this->addressFactory = $addressFactory;
-        $this->customerHelper = $customer;
-        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions);
+        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions, $customer);
     }
 
     /**
@@ -77,6 +74,12 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
         $magentoCustomer->setGender($this->getMagentoGender($customer->getGender()));
         $magentoCustomer->setDob($customer->getBirthday());
         $magentoCustomer->addData($customFields);
+
+        $prefix = $this->customerHelper->getMagentoPrefix($customer->getGender());
+        if ($prefix !== null) {
+            $magentoCustomer->setPrefix($prefix);
+        }
+
         $magentoCustomer->save();
     }
 
