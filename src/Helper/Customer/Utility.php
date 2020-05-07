@@ -38,6 +38,8 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
 {
     /** @var AddressFactory */
     private $addressFactory;
+    /** @var CustomerHelper */
+    private $customerHelper;
 
     /**
      * @param GroupCollection    $customerGroupCollection
@@ -56,7 +58,8 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
         Regions $regions
     ) {
         $this->addressFactory = $addressFactory;
-        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions, $customer);
+        $this->customerHelper = $customer;
+        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions);
     }
 
     /**
