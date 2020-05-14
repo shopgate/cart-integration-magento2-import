@@ -186,6 +186,13 @@ class Order
         $quote->getShippingAddress()->setData('should_ignore_validation', true);
         $quote->getBillingAddress()->setData('should_ignore_validation', true);
 
+        // save quote before submitting to validate item qty before the order is placed.
+        // when a non-backorderable product is saved in an order, it will become "out of stock" if the current order
+        // depletes its inventory. any quote item validation done after the order placement will thus fail.
+        // $this->quoteManagement->submit() saves the quote *after* the order is placed to update its data. it is thus
+        // important that the quoteItems are already saved before this point to avoid a too late stock validation.
+        $this->quoteRepository->save($quote);
+
         $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
         $order = $this->quoteManagement->submit($quote);
         if (null === $order) {
