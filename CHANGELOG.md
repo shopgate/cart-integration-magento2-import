@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Fixed
 - Order import if poduct is only available once
+- Free shipping coupons durong addOrder
 
 ## [2.9.15] - 2020-02-05
 ### Removed
