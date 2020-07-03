@@ -151,7 +151,6 @@ abstract class AbstractPayment
         MagentoOrder $magentoOrder,
         ShopgateOrder $shopgateOrder
     ): void {
-        $collection = $magentoOrder->getInvoiceCollection();
     }
 
     /**
