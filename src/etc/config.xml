@@ -4,6 +4,8 @@
             <order>
                 <shipping_title>Fixed</shipping_title>
                 <send_new_order_mail>0</send_new_order_mail>
+                <fix_totals_active>0</fix_totals_active>
+                <fix_totals_threshold>2</fix_totals_threshold>
             </order>
         </shopgate_import>
         <payment>

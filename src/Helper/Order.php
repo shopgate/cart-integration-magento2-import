@@ -29,11 +29,11 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Model\Order as MageOrder;
+use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\OrderNotifier;
 use Magento\Sales\Model\OrderRepository;
 use Shopgate\Base\Api\Config\CoreInterface;
@@ -78,8 +78,6 @@ class Order
     private $shippingHelper;
     /** @var PaymentFactory */
     private $paymentFactory;
-    /** @var SerializerInterface */
-    private $serializer;
 
     /**
      * @param Base                     $order
@@ -96,7 +94,6 @@ class Order
      * @param Shipping                 $shippingHelper
      * @param ManagerInterface         $eventManager
      * @param PaymentFactory           $paymentFactory
-     * @param SerializerInterface      $serializer
      * @param array                    $quoteMethods
      */
     public function __construct(
@@ -114,7 +111,6 @@ class Order
         Shipping $shippingHelper,
         ManagerInterface $eventManager,
         PaymentFactory $paymentFactory,
-        SerializerInterface $serializer,
         array $quoteMethods = []
     ) {
         $this->sgOrder           = $order;
@@ -132,7 +128,6 @@ class Order
         $this->shippingHelper    = $shippingHelper;
         $this->eventManager      = $eventManager;
         $this->paymentFactory    = $paymentFactory;
-        $this->serializer        = $serializer;
     }
 
     /**
@@ -245,12 +240,37 @@ class Order
      */
     protected function setOrderPayment()
     {
+        // check and fix total issues before payment processing
+        if ($this->shouldFixOrderTotals()) {
+            $this->mageOrder->setBaseTotalDue($this->sgOrder->getAmountComplete());
+            $this->mageOrder->setTotalDue($this->sgOrder->getAmountComplete());
+            $this->mageOrder->setBaseGrandTotal($this->sgOrder->getAmountComplete());
+            $this->mageOrder->setGrandTotal($this->sgOrder->getAmountComplete());
+        }
+
         $payment = $this->paymentFactory->getPayment($this->sgOrder->getPaymentMethod());
         $payment->manipulateOrderWithPaymentDataBeforeSave($this->mageOrder, $this->sgOrder);
 
         $this->mageOrder = $this->orderRepository->save($this->mageOrder);
 
         $payment->manipulateOrderWithPaymentDataAfterSave($this->mageOrder, $this->sgOrder);
+
+        // check and fix total issues after payment processing
+        if ($this->shouldFixOrderTotals()) {
+            $this->mageOrder->getPayment()->setAmountOrdered($this->sgOrder->getAmountComplete());
+            $this->mageOrder->getPayment()->setBaseAmountOrdered($this->sgOrder->getAmountComplete());
+
+            if ($createdInvoice = $this->mageOrder->getPayment()->getCreatedInvoice()) {
+                /** @var Invoice $createdInvoice */
+                $createdInvoice->setGrandTotal($this->mageOrder->getGrandTotal());
+                $createdInvoice->setBaseGrandTotal($this->mageOrder->getBaseGrandTotal());
+
+                $this->mageOrder->setBaseTotalInvoiced($createdInvoice->getBaseGrandTotal());
+                $this->mageOrder->setTotalInvoiced($createdInvoice->getGrandTotal());
+                $this->mageOrder->setTotalPaid($createdInvoice->getGrandTotal());
+                $this->mageOrder->setBaseTotalPaid($this->mageOrder->getBaseTotalInvoiced());
+            }
+        }
     }
 
     /**
@@ -312,6 +332,25 @@ class Order
             $this->log->debug('# Notified customer about new order');
             $this->orderNotifier->notify($this->mageOrder);
         }
+    }
+
+    /**
+     * Returns whether order totals should be fixed or not
+     *
+     * @return bool
+     */
+    protected function shouldFixOrderTotals(): bool
+    {
+        if ($this->config->getConfigByPath(ImportService::PATH_FIX_ORDER_TOTALS)->getValue() === 0) {
+            return false;
+        }
+
+        $totalDifferenceInCent = (int) (abs(
+            $this->sgOrder->getAmountComplete() - $this->mageOrder->getBaseGrandTotal()
+        ) * 100);
+
+        return (bool) $totalDifferenceInCent <= (int) $this->config
+                ->getConfigByPath(ImportService::PATH_FIX_ORDER_TOTALS_THRESHOLD)->getValue();
     }
 
     /**
