@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Autofix for Grand Total mismatch, can be activated via configuration
+
 ### Fixed
 - Order import if poduct is only available once
 - Free shipping coupons during addOrder

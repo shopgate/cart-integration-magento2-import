@@ -6,3 +6,7 @@
 "[SHOPGATE] Order added by Shopgate.","[SHOPGATE] Bestellung durch Shopgate hinzugefügt."
 "[SHOPGATE] Shopgate order number: %1","[SHOPGATE] Shopgate-Bestellnummer: %1"
 "[SHOPGATE] Payment received.","[SHOPGATE] Die Zahlung wurde erhalten."
+"Detects and fixes differences for order grand totals between Shopgate and Magento orders.","Erkennt und behebt Unterschiede bei den Bestellsummen zwischen Shopgate und Magento Bestellungen."
+"Fix Order Total rounding issues","Rundungsfehler beheben"
+"Rounding threshold in Cent","Schwellwert für Rundungsfehler in Cent"
+"Only positive digits from 1 and 99 allowed.","Nur positive Zahlen zwischen 1 und 99 erlaubt."

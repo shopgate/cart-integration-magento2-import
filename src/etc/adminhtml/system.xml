@@ -15,6 +15,19 @@
                     <comment>Note: Shopgate also sends a order confirmation email to the customer!</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="fix_totals_active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Fix Order Total rounding issues</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Detects and fixes differences for order totals between Shopgate and Magento orders.</comment>
+                </field>
+                <field id="fix_totals_threshold" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rounding threshold in Cent</label>
+                    <comment>Only positive digits from 1 and 99 allowed.</comment>
+                    <validate>validate-digits validate-not-negative-number validate-digits-range digits-range-1-99</validate>
+                    <depends>
+                        <field id="shopgate_import/order/fix_totals_active">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
         <section id="payment" translate="label" type="text" sortOrder="400" showInDefault="1" showInWebsite="1"
