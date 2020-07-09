@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 - mapping for name prefix
+- Autofix for Grand Total mismatch, can be activated via configuration
+
+### Fixed
+- Order import if poduct is only available once
+- Free shipping coupons during addOrder
 
 ## [2.9.15] - 2020-02-05
 ### Removed
