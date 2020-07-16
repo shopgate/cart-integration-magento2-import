@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+- mapping for name prefix
 - Autofix for Grand Total mismatch, can be activated via configuration
 
 ### Fixed
