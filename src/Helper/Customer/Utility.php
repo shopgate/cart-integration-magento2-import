@@ -77,6 +77,12 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
         $magentoCustomer->setGender($this->getMagentoGender($customer->getGender()));
         $magentoCustomer->setDob($customer->getBirthday());
         $magentoCustomer->addData($customFields);
+
+        $prefix = $this->customerHelper->getMagentoPrefix($customer->getGender());
+        if ($prefix !== null) {
+            $magentoCustomer->setPrefix($prefix);
+        }
+
         $magentoCustomer->save();
     }
 
