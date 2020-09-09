@@ -71,6 +71,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
     public function setBasicData($magentoCustomer, $customer)
     {
         $customFields = $this->customerHelper->getCustomFields($customer);
+        $magentoCustomer->setPrefix(' ');
         $magentoCustomer->setConfirmation(null);
         $magentoCustomer->setFirstname($customer->getFirstName());
         $magentoCustomer->setLastname($customer->getLastName());
