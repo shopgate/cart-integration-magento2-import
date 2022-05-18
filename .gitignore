@@ -1,4 +1,13 @@
+.editorconfig
+.vscode
+.htaccess
+.htaccess.sample
+.user.ini
+.travis.yml.sample
+.php_cs.dist
 .php-cs.cache
+composer.lock
 vendor
 release/shopgate_*
-release/validate_m2_package.php
+.idea
+magento2
