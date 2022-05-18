@@ -114,7 +114,8 @@ class Quote extends \Shopgate\Base\Helper\Quote
         $this->setItemQty();
         $client     = is_null($this->sgBase->getClient()) ? '' : $this->sgBase->getClient()->getType();
         $methodName = $this->sgBase->getShippingInfos()->getName();
-        $rate       = $this->quote->getShippingAddress()
+        $rate       = $this->quote->setData('totals_collected_flag', false)->collectTotals()
+                                  ->getShippingAddress()
                                   ->setCollectShippingRates(true)
                                   ->collectShippingRates()
                                   ->getShippingRateByCode($methodName);
