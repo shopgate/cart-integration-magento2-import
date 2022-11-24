@@ -6,7 +6,7 @@ jobs:
     name: Code style check
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Code Style
         run: |
           curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.4.0/php-cs-fixer.phar -o php-cs-fixer
@@ -21,9 +21,9 @@ jobs:
     steps:
       - name: Get tag name
         id: set-tag
-        run: echo ::set-output name=TAG_NAME::${GITHUB_REF:10}
+        run: echo :echo "TAG_NAME=${GITHUB_REF:10}" >> $GITHUB_OUTPUT
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -38,18 +38,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Shopgate Cart Integration Magento 2 Import ${{ github.ref }}
+          tag_name: ${{ steps.set-tag.outputs.TAG_NAME }}
+          release_name: Shopgate Cart Integration Magento 2 Import ${{ steps.set-tag.outputs.TAG_NAME }}
           draft: true
-      - name: Upload ZIP to GitHub release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/shopgate-import-${{ steps.set-tag.outputs.TAG_NAME }}.zip
-          asset_name: shopgate-import-${{ steps.set-tag.outputs.TAG_NAME }}.zip
-          asset_content_type: application/zip
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: ./release/shopgate-import-${{ steps.set-tag.outputs.TAG_NAME }}.zip
 
   notify-release-success:
     name: Notify developers of new release
@@ -61,7 +55,7 @@ jobs:
     steps:
       - name: Get tag name
         id: set-tag
-        run: echo ::set-output name=TAG_NAME::${GITHUB_REF:10}
+        run: echo "TAG_NAME=${GITHUB_REF:10}" >> $GITHUB_OUTPUT
       - name: Notify on Slack
         uses: rtCamp/action-slack-notify@v2
         env:
@@ -81,7 +75,7 @@ jobs:
     steps:
       - name: Get tag name
         id: set-tag
-        run: echo ::set-output name=TAG_NAME::${GITHUB_REF:10}
+        run: echo "TAG_NAME=${GITHUB_REF:10}" >> $GITHUB_OUTPUT
       - name: Notify on Slack
         uses: rtCamp/action-slack-notify@v2
         env:
