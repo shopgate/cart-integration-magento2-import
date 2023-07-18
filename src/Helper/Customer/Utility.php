@@ -30,6 +30,7 @@ use Magento\Customer\Model\Data\Customer as DataCustomer;
 use Magento\Customer\Model\ResourceModel\Group\Collection as GroupCollection;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Tax\Model\ResourceModel\TaxClass\Collection as TaxClassCollection;
+use Shopgate\Base\Helper\Gender;
 use Shopgate\Base\Helper\Regions;
 use Shopgate\Base\Helper\Shopgate\Customer as CustomerHelper;
 use ShopgateCustomer;
@@ -48,6 +49,7 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
      * @param AddressFactory     $addressFactory
      * @param CustomerHelper     $customer
      * @param Regions            $regions
+     * @param Gender             $genderHelper
      */
     public function __construct(
         GroupCollection $customerGroupCollection,
@@ -55,11 +57,12 @@ class Utility extends \Shopgate\Base\Helper\Customer\Utility
         CountryFactory $countryFactory,
         AddressFactory $addressFactory,
         CustomerHelper $customer,
-        Regions $regions
+        Regions $regions,
+        Gender $genderHelper
     ) {
         $this->addressFactory = $addressFactory;
         $this->customerHelper = $customer;
-        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions);
+        parent::__construct($customerGroupCollection, $taxCollection, $countryFactory, $regions, $genderHelper);
     }
 
     /**
