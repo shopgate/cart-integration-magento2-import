@@ -34,7 +34,7 @@ jobs:
           TAG_NAME: ${{ steps.set-tag.outputs.TAG_NAME }}
       - name: Create GitHub release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
