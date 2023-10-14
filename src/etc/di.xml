@@ -45,4 +45,14 @@
             </argument>
         </arguments>
     </type>
+    <type name="Shopgate\Import\Block\Adminhtml\Order\View\View">
+        <arguments>
+            <argument name="whitelist" xsi:type="array">
+                <item name="payment_infos" xsi:type="array">
+                    <item name="0" xsi:type="string">shopgate_payment_name</item>
+                    <item name="1" xsi:type="string">credit_card</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>

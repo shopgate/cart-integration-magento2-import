@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 - support for enhanced gender options from Shopgate
+- payment name for Shopgate orders in the admin order detail view
 
 ## [2.9.17] - 2022-05-18
 ### Fixed

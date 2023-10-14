@@ -1,0 +1,53 @@
+<?php
+/**
+ * @var $block \Shopgate\Import\Block\Adminhtml\Order\View\View
+ */
+if ($block->isShopgateOrder()) { ?>
+    <style>
+        #shopgate-order-block ul {
+            list-style: none;
+        }
+
+        #shopgate-order-block ul ul {
+            margin: 5px 0 0 10px;
+        }
+
+        #shopgate-order-block ul li {
+            margin: 5px 0;
+        }
+    </style>
+    <section id="shopgate-order-block" class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title">Shopgate Order Information</span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="admin__page-section-item">
+                <?php if ($paymentInfo = $block->getPaymentInfos()) { ?>
+                    <div class="admin__page-section-item-title">
+                        <span class="title">Payment Information</span>
+                    </div>
+                    <div class="admin__page-section-item-content">
+                        <ul>
+                            <?php foreach ($paymentInfo as $key => $value) { ?>
+                                <?php if (is_array($value)) { ?>
+                                    <li>
+                                        <strong><?php echo $key; ?> </strong>
+                                        <ul>
+                                            <?php foreach ($value as $secondKey => $secondValue) { ?>
+                                                <li>
+                                                    <strong><?php echo $secondKey; ?></strong>: <?php echo $secondValue; ?>
+                                                </li>
+                                            <?php } ?>
+                                        </ul>
+                                    </li>
+                                <?php } else { ?>
+                                    <li><strong><?php echo $key ?></strong>: <?php echo $value ?></li>
+                                <?php } ?>
+                            <?php } ?>
+                        </ul>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </section>
+<?php } ?>
