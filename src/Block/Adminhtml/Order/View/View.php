@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /**
  * Copyright Shopgate Inc.
@@ -19,6 +19,7 @@
  * @copyright Shopgate Inc
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
+declare(strict_types=1);
 
 namespace Shopgate\Import\Block\Adminhtml\Order\View;
 
