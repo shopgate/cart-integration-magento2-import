@@ -21,7 +21,14 @@ if ($block->isShopgateOrder()) { ?>
             <span class="title">Shopgate Order Information</span>
         </div>
         <div class="admin__page-section-content">
-           <?php echo $block->printData(); ?>
+            <div class='admin__page-section-item'>
+                <div class='admin__page-section-item-title'>
+                    <span class='title'>Payment Information</span>
+                </div>
+                <div class='admin__page-section-item-content'>
+                   <?php echo $block->printPaymentInfo(); ?>
+                </div>
+            </div>
         </div>
     </section>
 <?php } ?>

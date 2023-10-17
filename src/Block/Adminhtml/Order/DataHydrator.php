@@ -26,8 +26,14 @@ namespace Shopgate\Import\Block\Adminhtml\Order;
 class DataHydrator
 {
 
+    /**
+     * @var array
+     */
     private $data;
 
+    /**
+     * @param array $data
+     */
     public function __construct(array $data)
     {
         $this->data = $data;
@@ -46,11 +52,21 @@ class DataHydrator
         return $this;
     }
 
+    /**
+     * Data retrieve
+     *
+     * @return array
+     */
     public function getData(): array
     {
         return $this->data;
     }
 
+    /**
+     * Removes null|empty array items
+     *
+     * @return $this
+     */
     public function removeEmpty(): self
     {
         $this->data = array_filter($this->getData(), function ($value) {
@@ -60,6 +76,11 @@ class DataHydrator
         return $this;
     }
 
+    /**
+     * Cleans keys into pretty-print format
+     *
+     * @return $this
+     */
     public function readableKeys(): self
     {
         $this->data = $this->cleanKeys($this->getData());

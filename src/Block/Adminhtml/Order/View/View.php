@@ -24,9 +24,7 @@ declare(strict_types=1);
 namespace Shopgate\Import\Block\Adminhtml\Order\View;
 
 use Magento\Backend\Block\Template;
-use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Shopgate\Base\Api\Data\OrderInterface;
 use Shopgate\Base\Helper\Encoder;
 use Shopgate\Base\Model\Shopgate\Order;
@@ -36,21 +34,34 @@ use Shopgate\Import\Block\Adminhtml\Order\DataHydrator;
 class View extends Template
 {
 
+    /**
+     * @var OrderRepository
+     */
     private $orderRepository;
+    /**
+     * @var array
+     */
     private $whitelist;
-
+    /**
+     * @var Encoder
+     */
     private $jsonDecoder;
 
+    /**
+     * @param OrderRepository $orderRepository
+     * @param Template\Context $context
+     * @param Encoder $jsonDecoder
+     * @param array $whitelist - our whitelisted data to print, see di.xml
+     * @param array $data
+     */
     public function __construct(
         OrderRepository $orderRepository,
         Template\Context $context,
         Encoder $jsonDecoder,
         array $whitelist = [],
-        array $data = [],
-        ?JsonHelper $jsonHelper = null,
-        ?DirectoryHelper $directoryHelper = null
+        array $data = []
     ) {
-        parent::__construct($context, $data, $jsonHelper, $directoryHelper);
+        parent::__construct($context, $data);
         $this->orderRepository = $orderRepository;
         $this->whitelist = $whitelist;
         $this->jsonDecoder = $jsonDecoder;
@@ -83,66 +94,40 @@ class View extends Template
     }
 
     /**
-     * Prints all teh data
+     * Prints all payment info
      *
      * @return string
      */
-    public function printData(): string
+    public function printPaymentInfo(): string
     {
         $paymentInfo = $this->getPaymentInfos();
         if (!$paymentInfo) {
             return '';
         }
 
-        return $this->printSectionItem('Payment Information', $paymentInfo);
-    }
-
-    /**
-     * Print section
-     *
-     * @param string $title
-     * @param array $list
-     * @return string
-     */
-    private function printSectionItem(string $title, array $list): string
-    {
-        $html = "
-            <div class='admin__page-section-item'>
-                    <div class='admin__page-section-item-title'>
-                        <span class='title'>$title</span>
-                    </div>
-                    <div class='admin__page-section-item-content'>
-                        <ul>";
-        foreach ($list as $key => $value) {
-            if (is_array($value)) {
-                $html .= $this->printSubList($key, $value);
-            } else {
-                $html .= "<li><strong>$key</strong>: $value</li>";
-            }
-        }
-        $html .= '</ul></div></div>';
-
-        return $html;
+        return $this->printList($paymentInfo);
     }
 
     /**
      * Prints lists under the main one
      *
-     * @param string $title
      * @param array $list
+     * @param ?string $title - meant for sub-lists only, check <li> tags
      * @return string
      */
-    private function printSubList(string $title, array $list): string
+    private function printList(array $list, ?string $title = null): string
     {
-        $html = "<li><strong>$title</strong><ul>";
+        $html = $title ? "<li><strong>$title</strong>" : ''; // if sublist
+        $html .= '<ul>';
         foreach ($list as $key => $value) {
             if (is_array($value)) {
-                $html .= $this->printSubList($key, $value);
+                $html .= $this->printList($value, $key);
             } else {
                 $html .= "<li><strong>$key</strong>: $value</li>";
             }
         }
-        $html .= '</ul></li>';
+        $html .= '</ul>';
+        $html .= $title ? '</li>' : '';
 
         return $html;
     }
