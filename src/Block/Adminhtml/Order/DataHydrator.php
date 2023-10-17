@@ -33,11 +33,22 @@ class DataHydrator
         $this->data = $data;
     }
 
+    /**
+     * Removes data
+     *
+     * @param array $whitelist
+     * @return $this
+     */
     public function filterWhitelist(array $whitelist): self
     {
         $this->data = array_intersect_key($this->getData(), array_flip($whitelist));
 
         return $this;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
     }
 
     public function removeEmpty(): self
@@ -56,6 +67,12 @@ class DataHydrator
         return $this;
     }
 
+    /**
+     * Takes in a list & transforms keys into pretty print
+     *
+     * @param array $data
+     * @return array
+     */
     private function cleanKeys(array $data): array
     {
         foreach ($data as $key => $value) {
@@ -65,13 +82,14 @@ class DataHydrator
         return $data;
     }
 
-    private function cleanKey(string $key): string
+    /**
+     * Makes the value print ready
+     *
+     * @param string $text
+     * @return string
+     */
+    private function cleanKey(string $text): string
     {
-        return ucwords(str_replace('_', ' ', $key));
-    }
-
-    public function getData(): array
-    {
-        return $this->data;
+        return ucwords(str_replace('_', ' ', $text));
     }
 }

@@ -21,33 +21,7 @@ if ($block->isShopgateOrder()) { ?>
             <span class="title">Shopgate Order Information</span>
         </div>
         <div class="admin__page-section-content">
-            <div class="admin__page-section-item">
-                <?php if ($paymentInfo = $block->getPaymentInfos()) { ?>
-                    <div class="admin__page-section-item-title">
-                        <span class="title">Payment Information</span>
-                    </div>
-                    <div class="admin__page-section-item-content">
-                        <ul>
-                            <?php foreach ($paymentInfo as $key => $value) { ?>
-                                <?php if (is_array($value)) { ?>
-                                    <li>
-                                        <strong><?php echo $key; ?> </strong>
-                                        <ul>
-                                            <?php foreach ($value as $secondKey => $secondValue) { ?>
-                                                <li>
-                                                    <strong><?php echo $secondKey; ?></strong>: <?php echo $secondValue; ?>
-                                                </li>
-                                            <?php } ?>
-                                        </ul>
-                                    </li>
-                                <?php } else { ?>
-                                    <li><strong><?php echo $key ?></strong>: <?php echo $value ?></li>
-                                <?php } ?>
-                            <?php } ?>
-                        </ul>
-                    </div>
-                <?php } ?>
-            </div>
+           <?php echo $block->printData(); ?>
         </div>
     </section>
 <?php } ?>

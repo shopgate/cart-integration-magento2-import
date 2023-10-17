@@ -56,6 +56,11 @@ class View extends Template
         $this->jsonDecoder = $jsonDecoder;
     }
 
+    /**
+     * Checks if it's a Shopgate order
+     *
+     * @return bool
+     */
     public function isShopgateOrder(): bool
     {
         return $this->getShopgateOrder() && !$this->getShopgateOrder()->isEmpty();
@@ -75,6 +80,71 @@ class View extends Template
             ->removeEmpty()
             ->readableKeys()
             ->getData();
+    }
+
+    /**
+     * Prints all teh data
+     *
+     * @return string
+     */
+    public function printData(): string
+    {
+        $paymentInfo = $this->getPaymentInfos();
+        if (!$paymentInfo) {
+            return '';
+        }
+
+        return $this->printSectionItem('Payment Information', $paymentInfo);
+    }
+
+    /**
+     * Print section
+     *
+     * @param string $title
+     * @param array $list
+     * @return string
+     */
+    private function printSectionItem(string $title, array $list): string
+    {
+        $html = "
+            <div class='admin__page-section-item'>
+                    <div class='admin__page-section-item-title'>
+                        <span class='title'>$title</span>
+                    </div>
+                    <div class='admin__page-section-item-content'>
+                        <ul>";
+        foreach ($list as $key => $value) {
+            if (is_array($value)) {
+                $html .= $this->printSubList($key, $value);
+            } else {
+                $html .= "<li><strong>$key</strong>: $value</li>";
+            }
+        }
+        $html .= '</ul></div></div>';
+
+        return $html;
+    }
+
+    /**
+     * Prints lists under the main one
+     *
+     * @param string $title
+     * @param array $list
+     * @return string
+     */
+    private function printSubList(string $title, array $list): string
+    {
+        $html = "<li><strong>$title</strong><ul>";
+        foreach ($list as $key => $value) {
+            if (is_array($value)) {
+                $html .= $this->printSubList($key, $value);
+            } else {
+                $html .= "<li><strong>$key</strong>: $value</li>";
+            }
+        }
+        $html .= '</ul></li>';
+
+        return $html;
     }
 
     /**
