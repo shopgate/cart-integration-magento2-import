@@ -23,7 +23,7 @@
   ],
   "require": {
     "php": ">=7.1",
-    "shopgate/cart-integration-magento2-base": "~2.9.14"
+    "shopgate/cart-integration-magento2-base": "~2.9.33 || dev-AP-237-order-sg-payment-data-add"
   },
   "require-dev": {
     "magento/module-braintree": "^100.3"
