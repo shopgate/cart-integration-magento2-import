@@ -63,7 +63,7 @@ class View extends Template
      */
     public function __construct(
         OrderRepository $orderRepository,
-        Template\Context $context,
+        Context $context,
         Encoder $jsonDecoder,
         SgLoggerInterface $logger,
         array $whitelist = [],
@@ -154,7 +154,7 @@ class View extends Template
             try {
                 $this->shopgateOrder = $this->orderRepository->getByMageOrder($id);
             } catch (LocalizedException $e) {
-                $this->logger->error('Mage Order View error: '. $e->getMessage());
+                $this->logger->error('Mage Order View error: ' . $e->getMessage());
             }
         }
 
