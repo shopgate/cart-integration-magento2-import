@@ -46,6 +46,8 @@ class View extends Template
      * @var Encoder
      */
     private $jsonDecoder;
+    /** @var null|OrderInterface|Order */
+    private $shopgateOrder = null;
 
     /**
      * @param OrderRepository $orderRepository
@@ -141,10 +143,14 @@ class View extends Template
     {
         $id = $this->getRequest()->getParam('order_id');
 
-        try {
-            return $this->orderRepository->getByMageOrder($id);
-        } catch (LocalizedException $e) {
-            return null;
+        if ($this->shopgateOrder === null) {
+            try {
+                $this->shopgateOrder = $this->orderRepository->getByMageOrder($id);
+            } catch (LocalizedException $e) {
+                // do nothing
+            }
         }
+
+        return $this->shopgateOrder;
     }
 }
