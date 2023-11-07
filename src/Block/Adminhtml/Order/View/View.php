@@ -24,11 +24,13 @@ declare(strict_types=1);
 namespace Shopgate\Import\Block\Adminhtml\Order\View;
 
 use Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
 use Shopgate\Base\Api\Data\OrderInterface;
 use Shopgate\Base\Helper\Encoder;
 use Shopgate\Base\Model\Shopgate\Order;
 use Shopgate\Base\Model\Shopgate\OrderRepository;
+use Shopgate\Base\Model\Utility\SgLoggerInterface;
 use Shopgate\Import\Block\Adminhtml\Order\DataHydrator;
 
 class View extends Template
@@ -48,11 +50,14 @@ class View extends Template
     private $jsonDecoder;
     /** @var null|OrderInterface|Order */
     private $shopgateOrder = null;
+    /** @var SgLoggerInterface */
+    private $logger;
 
     /**
      * @param OrderRepository $orderRepository
-     * @param Template\Context $context
+     * @param Context $context
      * @param Encoder $jsonDecoder
+     * @param SgLoggerInterface $logger
      * @param array $whitelist - our whitelisted data to print, see di.xml
      * @param array $data
      */
@@ -60,6 +65,7 @@ class View extends Template
         OrderRepository $orderRepository,
         Template\Context $context,
         Encoder $jsonDecoder,
+        SgLoggerInterface $logger,
         array $whitelist = [],
         array $data = []
     ) {
@@ -67,6 +73,7 @@ class View extends Template
         $this->orderRepository = $orderRepository;
         $this->whitelist = $whitelist;
         $this->jsonDecoder = $jsonDecoder;
+        $this->logger = $logger;
     }
 
     /**
@@ -147,7 +154,7 @@ class View extends Template
             try {
                 $this->shopgateOrder = $this->orderRepository->getByMageOrder($id);
             } catch (LocalizedException $e) {
-                // do nothing
+                $this->logger->error('Mage Order View error: '. $e->getMessage());
             }
         }
 
