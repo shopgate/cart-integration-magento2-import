@@ -1,0 +1,34 @@
+<?php
+/**
+ * @var $block \Shopgate\Import\Block\Adminhtml\Order\View\View
+ */
+if ($block->isShopgateOrder()) { ?>
+    <style>
+        #shopgate-order-block ul {
+            list-style: none;
+        }
+
+        #shopgate-order-block ul ul {
+            margin: 5px 0 0 10px;
+        }
+
+        #shopgate-order-block ul li {
+            margin: 5px 0;
+        }
+    </style>
+    <section id="shopgate-order-block" class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title">Shopgate Order Information</span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class='admin__page-section-item'>
+                <div class='admin__page-section-item-title'>
+                    <span class='title'>Payment Information</span>
+                </div>
+                <div class='admin__page-section-item-content'>
+                   <?php echo $block->printPaymentInfo(); ?>
+                </div>
+            </div>
+        </div>
+    </section>
+<?php } ?>
