@@ -3,7 +3,7 @@
   "description": "Shopgate import module for Magento 2, handles all import functionality",
   "license": "Apache-2.0",
   "type": "magento2-module",
-  "version": "2.9.18-alpha2",
+  "version": "2.9.18",
   "authors": [
     {
       "name": "Konstantin Kiritsenko"
