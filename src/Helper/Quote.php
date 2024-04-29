@@ -30,6 +30,7 @@ use Magento\Quote\Model\QuoteManagement;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Tax\Helper\Data as Tax;
+use Shopgate\Base\Helper\Encoder;
 use Shopgate\Base\Helper\Product\Type;
 use Shopgate\Base\Helper\Product\Utility;
 use Shopgate\Base\Helper\Quote\Coupon;
@@ -72,10 +73,11 @@ class Quote extends \Shopgate\Base\Helper\Quote
         Coupon $quoteCoupon,
         QuoteRepository $quoteRepository,
         Type $typeHelper,
-        PaymentFactory $paymentFactory
+        PaymentFactory $paymentFactory,
+        Encoder $encoder
     ) {
         parent::__construct($quote, $cart, $logger, $productHelper, $taxData, $quoteCustomer, $coreRegistry,
-            $storeManager, $quoteCoupon, $quoteRepository, $typeHelper);
+            $storeManager, $quoteCoupon, $quoteRepository, $typeHelper, $encoder);
 
         $this->paymentFactory = $paymentFactory;
     }
