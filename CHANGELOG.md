@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [2.9.19]
 ### Added
 - compatibility with latest Shopgate M2 base module
 
@@ -106,7 +107,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Implemented register_customer call
 
-[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.18...HEAD
+[Unreleased]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.19...HEAD
+[2.9.19]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.18...2.9.19
 [2.9.18]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.17...2.9.18
 [2.9.17]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.16...2.9.17
 [2.9.16]: https://github.com/shopgate/cart-integration-magento2-import/compare/2.9.15...2.9.16
