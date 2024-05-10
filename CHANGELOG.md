@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
-- compatibility with latest Shopgate Base module
+- compatibility with latest Shopgate M2 base module
 
 ## [2.9.18]
 ### Added
