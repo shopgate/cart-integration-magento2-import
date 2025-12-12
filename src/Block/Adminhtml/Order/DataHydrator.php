@@ -96,11 +96,12 @@ class DataHydrator
      */
     private function cleanKeys(array $data): array
     {
+        $newData = [];
         foreach ($data as $key => $value) {
-            $data[$this->cleanKey($key)] = is_array($value) ? $this->cleanKeys($value) : $value;
-            unset($data[$key]);
+            $newKey = $this->cleanKey((string)$key);
+            $newData[$newKey] = is_array($value) ? $this->cleanKeys($value) : $value;
         }
-        return $data;
+        return $newData;
     }
 
     /**
