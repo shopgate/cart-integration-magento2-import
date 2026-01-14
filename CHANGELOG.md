@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Removed
+- support for Magento 2 below version 2.4.4
+- PHP Support below Version 8.1
+
 ## [2.9.19] - 2024-05-10
 ### Added
 - compatibility with latest Shopgate M2 base module
