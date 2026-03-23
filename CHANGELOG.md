@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
-## [2.10.0]
+## [2.10.0] - 2026-03-23
 ### Removed
 - support for Magento 2 below version 2.4.4
 - PHP Support below Version 8.1
